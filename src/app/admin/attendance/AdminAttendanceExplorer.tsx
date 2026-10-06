@@ -56,7 +56,9 @@ export default function AdminAttendanceExplorer({
       }
 
       return true;
-    });
+    }).sort(
+      (a, b) => new Date(b.punch_time).getTime() - new Date(a.punch_time).getTime()
+    );
   }, [initialRecords, search, selectedDate, selectedPunchType, selectedMethod]);
 
   const formatTime = (isoString: string) => {

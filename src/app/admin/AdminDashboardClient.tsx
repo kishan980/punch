@@ -26,7 +26,11 @@ export default function AdminDashboardClient({
   initialTodayPunches,
 }: AdminDashboardClientProps) {
   const supabase = createClient();
-  const [punches, setPunches] = useState<AttendanceRecord[]>(initialTodayPunches);
+  const [punches, setPunches] = useState<AttendanceRecord[]>(
+    [...initialTodayPunches].sort(
+      (a, b) => new Date(b.punch_time).getTime() - new Date(a.punch_time).getTime()
+    )
+  );
   const [totalMembers] = useState(initialTotalMembers);
   const [liveEventNotice, setLiveEventNotice] = useState<string | null>(null);
 

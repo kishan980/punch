@@ -82,10 +82,15 @@ export default function AttendanceList({ records, todayOnly = false }: Attendanc
     }
   };
 
+  // Always ensure records are sorted newest first (descending)
+  const sortedRecords = [...records].sort(
+    (a, b) => new Date(b.punch_time).getTime() - new Date(a.punch_time).getTime()
+  );
+
   if (todayOnly) {
     return (
       <div className="space-y-2.5">
-        {records.map((record) => {
+        {sortedRecords.map((record) => {
           const isIn = record.punch_type === "in";
           return (
             <div
@@ -130,9 +135,9 @@ export default function AttendanceList({ records, todayOnly = false }: Attendanc
     );
   }
 
-  // Group by date for history view
+  // Group by date for history view (newest days and newest punches within each day first)
   const groupedByDate: Record<string, AttendanceRecord[]> = {};
-  records.forEach((record) => {
+  sortedRecords.forEach((record) => {
     const dateKey = formatDateHeader(record.punch_time);
     if (!groupedByDate[dateKey]) {
       groupedByDate[dateKey] = [];

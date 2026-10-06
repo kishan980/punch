@@ -78,7 +78,7 @@ export default async function MemberDashboardPage() {
     .select("*")
     .eq("user_id", user.id)
     .gte("punch_time", startOfDay)
-    .order("punch_time", { ascending: true });
+    .order("punch_time", { ascending: false });
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col">

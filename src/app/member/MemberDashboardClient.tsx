@@ -63,7 +63,7 @@ export default function MemberDashboardClient({
           filter: `user_id=eq.${profile.auth_user_id}`,
         },
         (payload) => {
-          setPunches((prev) => [...prev, payload.new as AttendanceRecord]);
+          setPunches((prev) => [payload.new as AttendanceRecord, ...prev]);
         }
       )
       .subscribe();
@@ -73,12 +73,12 @@ export default function MemberDashboardClient({
     };
   }, [profile.auth_user_id, supabase]);
 
-  // Compute punch status for today
-  const latestPunch = punches.length > 0 ? punches[punches.length - 1] : null;
+  // Compute punch status for today (newest punch is at index 0)
+  const latestPunch = punches.length > 0 ? punches[0] : null;
   const isPunchedIn = latestPunch?.punch_type === "in";
 
-  const firstIn = punches.find((p) => p.punch_type === "in");
-  const lastOut = [...punches].reverse().find((p) => p.punch_type === "out");
+  const firstIn = [...punches].reverse().find((p) => p.punch_type === "in");
+  const lastOut = punches.find((p) => p.punch_type === "out");
 
   const formatTime = (isoString?: string) => {
     if (!isoString) return "";
