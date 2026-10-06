@@ -39,12 +39,7 @@ export async function POST(request: Request) {
       .select("credential_id")
       .eq("user_id", user.id);
 
-    const excludeCredentials = (existingCredentials || []).map((cred) => ({
-      id: cred.credential_id,
-      transports: ["internal" as const],
-    }));
-
-    // Generate registration options specifically tailored for platform mobile biometrics
+    // Allow re-registration anytime without authenticator duplicate exclusion blocks
     const options = await generateRegistrationOptions({
       rpName,
       rpID: rpId,
@@ -52,7 +47,7 @@ export async function POST(request: Request) {
       userName: user.email || profile?.member_code || "Gym Member",
       userDisplayName: profile?.full_name || "Gym Member",
       attestationType: "none",
-      excludeCredentials,
+      excludeCredentials: [], // Allows re-registration and multiple biometric enrollments
       authenticatorSelection: {
         authenticatorAttachment: "platform", // Enforces platform biometric (Fingerprint / Face ID / PIN)
         residentKey: "preferred",

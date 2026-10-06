@@ -227,12 +227,26 @@ export default function BiometricRegister({
         </div>
       )}
 
-      {/* Main Register Button */}
+      {/* Main Register / Link Buttons */}
       <div className="space-y-3">
+        {credentialCount > 0 && (
+          <a
+            href="/member"
+            className="w-full py-4 px-6 rounded-2xl font-black text-base flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-lg shadow-emerald-950/60 active:scale-[0.98] transition-all border border-emerald-400/30 text-center"
+          >
+            <Fingerprint className="w-6 h-6 animate-pulse" />
+            <span>🔐 GO TO PUNCH IN / OUT</span>
+          </a>
+        )}
+
         <button
           onClick={handleRegister}
           disabled={loading || testing}
-          className="w-full py-4 px-6 rounded-2xl font-black text-base flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-lg shadow-emerald-950/60 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed border border-emerald-400/30"
+          className={`w-full py-3.5 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed border ${
+            credentialCount > 0
+              ? "bg-slate-800/90 hover:bg-slate-700 text-slate-200 border-slate-700"
+              : "bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-lg shadow-emerald-950/60 border-emerald-400/30"
+          }`}
         >
           {loading ? (
             <>
@@ -241,8 +255,12 @@ export default function BiometricRegister({
             </>
           ) : (
             <>
-              <Fingerprint className="w-6 h-6" />
-              <span>LINK THIS PHONE BIOMETRIC</span>
+              <Fingerprint className="w-5 h-5" />
+              <span>
+                {credentialCount > 0
+                  ? "RE-LINK / ADD NEW FINGERPRINT"
+                  : "LINK THIS PHONE BIOMETRIC"}
+              </span>
             </>
           )}
         </button>
@@ -251,7 +269,7 @@ export default function BiometricRegister({
           <button
             onClick={handleTestBiometric}
             disabled={loading || testing}
-            className="w-full py-3 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 active:scale-[0.98] transition-all disabled:opacity-60"
+            className="w-full py-2.5 px-4 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 bg-slate-800/60 hover:bg-slate-700 text-emerald-300 border border-slate-700/80 active:scale-[0.98] transition-all disabled:opacity-60"
           >
             {testing ? (
               <>
@@ -266,6 +284,17 @@ export default function BiometricRegister({
             )}
           </button>
         )}
+      </div>
+
+      {/* Side-mounted Fingerprint Sensor Tip */}
+      <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-emerald-500/20 text-[11px] text-slate-300 space-y-1.5">
+        <div className="font-bold text-emerald-400 flex items-center gap-1.5">
+          <Smartphone className="w-3.5 h-3.5" />
+          <span>Side Fingerprint Scanner Tip:</span>
+        </div>
+        <p className="text-slate-400 leading-relaxed">
+          Agar biometric scan karte waqt phone aage ka Face camera scan karne lage, toh camera ki taraf mat dekhein — <strong>seedhe apne phone ke side wale power button / fingerprint sensor par ungli lagayein</strong>. Android side fingerprint turant scan kar lega!
+        </p>
       </div>
 
       {/* Status Messages */}
