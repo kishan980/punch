@@ -95,7 +95,7 @@ export default function BiometricRegister({
           throw new Error("Biometric authentication cancelled.");
         }
         if (err.name === "NotSupportedError") {
-          throw new Error("This device or browser does not support biometric authentication.");
+          throw new Error("Screen lock / Fingerprint is not set up on this device. Please add a Fingerprint or Screen Lock in your phone's Android Settings first.");
         }
         throw new Error(err.message || "Biometric registration was declined or failed.");
       }

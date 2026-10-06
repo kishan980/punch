@@ -49,9 +49,8 @@ export async function POST(request: Request) {
       attestationType: "none",
       excludeCredentials: [], // Allows re-registration and multiple biometric enrollments
       authenticatorSelection: {
-        authenticatorAttachment: "platform", // Enforces platform biometric (Fingerprint / Face ID / PIN)
         residentKey: "preferred",
-        userVerification: "preferred", // Compatible with all Android & iOS devices
+        userVerification: "preferred", // Compatible with all Android & iOS devices (Fingerprint / Face ID / PIN)
       },
     });
 
