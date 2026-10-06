@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     }
 
     // Convert Uint8Array public key to safe base64url string
-    const publicKeyBase64 = uint8ArrayToBase64Url(credentialPublicKeyBytes);
+    const publicKeyBase64 = uint8ArrayToBase64Url(credentialPublicKeyBytes as any);
 
     // Save credential in Supabase webauthn_credentials table
     const { error: insertError } = await supabase

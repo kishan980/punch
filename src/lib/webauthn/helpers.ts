@@ -92,13 +92,13 @@ export async function verifyAndClearBiometricReceipt(userId: string): Promise<bo
 /**
  * Convert Uint8Array to base64url string
  */
-export function uint8ArrayToBase64Url(bytes: Uint8Array): string {
+export function uint8ArrayToBase64Url(bytes: Uint8Array | any): string {
   return Buffer.from(bytes).toString("base64url");
 }
 
 /**
  * Convert base64url string to Uint8Array
  */
-export function base64UrlToUint8Array(base64url: string): Uint8Array {
+export function base64UrlToUint8Array(base64url: string): any {
   return new Uint8Array(Buffer.from(base64url, "base64url"));
 }

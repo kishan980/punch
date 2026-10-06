@@ -67,7 +67,7 @@ export async function POST(request: Request) {
       expectedRPID: rpId,
       credential: {
         id: credentialRecord.credential_id,
-        publicKey: credentialPublicKeyBytes,
+        publicKey: credentialPublicKeyBytes as any,
         counter: Number(credentialRecord.counter),
       },
       requireUserVerification: false,
