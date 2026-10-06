@@ -94,6 +94,7 @@ export default function MemberDashboardClient({
   };
 
   const handlePunchSuccess = () => {
+    router.push("/member/attendance");
     router.refresh();
   };
 

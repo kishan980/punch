@@ -110,7 +110,11 @@ export default function PunchButton({
       if (onSuccess) {
         setTimeout(() => {
           onSuccess();
-        }, 1200);
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          window.location.href = "/member/attendance";
+        }, 1000);
       }
     } catch (err: unknown) {
       soundEffects.playPunchError();
