@@ -180,116 +180,117 @@ export default function AdminDashboardClient({
             No punches recorded today yet.
           </p>
         ) : (
-          <div className="overflow-x-auto scrollbar-thin">
-            <table className="min-w-full text-left text-xs whitespace-nowrap">
-              <thead>
-                <tr className="border-b border-slate-800/80 text-slate-400 uppercase tracking-wider text-[10px]">
-                  <th className="py-2.5 px-3 font-bold whitespace-nowrap">Member</th>
-                  <th className="py-2.5 px-3 font-bold whitespace-nowrap">Time</th>
-                  <th className="py-2.5 px-3 font-bold whitespace-nowrap">Type</th>
-                  <th className="py-2.5 px-3 font-bold whitespace-nowrap">Method</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/50">
-                {paginatedPunches.map((record) => {
-                  const isIn = record.punch_type === "in";
-                  return (
-                    <tr
-                      key={record.id}
-                      className="hover:bg-slate-800/30 transition-colors animate-fadeIn"
+          <>
+            <div className="overflow-x-auto scrollbar-thin">
+              <table className="min-w-full text-left text-xs whitespace-nowrap">
+                <thead>
+                  <tr className="border-b border-slate-800/80 text-slate-400 uppercase tracking-wider text-[10px]">
+                    <th className="py-2.5 px-3 font-bold whitespace-nowrap">Member</th>
+                    <th className="py-2.5 px-3 font-bold whitespace-nowrap">Time</th>
+                    <th className="py-2.5 px-3 font-bold whitespace-nowrap">Type</th>
+                    <th className="py-2.5 px-3 font-bold whitespace-nowrap">Method</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/50">
+                  {paginatedPunches.map((record) => {
+                    const isIn = record.punch_type === "in";
+                    return (
+                      <tr
+                        key={record.id}
+                        className="hover:bg-slate-800/30 transition-colors animate-fadeIn"
+                      >
+                        <td className="py-3 px-3 font-semibold text-slate-200 whitespace-nowrap">
+                          <div className="whitespace-nowrap">{record.profiles?.full_name || "Unknown Member"}</div>
+                          <div className="text-[10px] font-mono text-slate-500 whitespace-nowrap">
+                            {record.profiles?.member_code}
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 font-mono text-slate-300 whitespace-nowrap">
+                          {formatTime(record.punch_time)}
+                        </td>
+                        <td className="py-3 px-3 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${
+                              isIn
+                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                                : "bg-amber-500/10 text-amber-400 border border-amber-500/30"
+                            }`}
+                          >
+                            {record.punch_type}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-slate-400 whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1 text-[11px] whitespace-nowrap">
+                            {record.method === "mobile_biometric" ? (
+                              <>
+                                <Smartphone className="w-3 h-3 text-emerald-400 shrink-0" />
+                                <span className="whitespace-nowrap">Mobile Biometric</span>
+                              </>
+                            ) : (
+                              <>
+                                <Cpu className="w-3 h-3 text-cyan-400 shrink-0" />
+                                <span className="whitespace-nowrap">{record.method}</span>
+                              </>
+                            )}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* PAGINATION CONTROLS BAR */}
+            {totalPages > 1 && (
+              <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs pt-3">
+                <div className="flex items-center gap-2 text-slate-400">
+                  <span>Show</span>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => {
+                      setPageSize(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="bg-slate-900 border border-slate-800 text-slate-200 rounded-lg px-2 py-0.5 text-xs focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                  </select>
+                  <span>per page</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400 font-mono text-[11px]">
+                    Page <strong className="text-white">{safePage}</strong> of{" "}
+                    <strong className="text-white">{totalPages}</strong>
+                  </span>
+
+                  <div className="flex items-center gap-1 ml-2">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={safePage <= 1}
+                      className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      aria-label="Previous Page"
                     >
-                      <td className="py-3 px-3 font-semibold text-slate-200 whitespace-nowrap">
-                        <div className="whitespace-nowrap">{record.profiles?.full_name || "Unknown Member"}</div>
-                        <div className="text-[10px] font-mono text-slate-500 whitespace-nowrap">
-                          {record.profiles?.member_code}
-                        </div>
-                      </td>
-                      <td className="py-3 px-3 font-mono text-slate-300 whitespace-nowrap">
-                        {formatTime(record.punch_time)}
-                      </td>
-                      <td className="py-3 px-3 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${
-                            isIn
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                              : "bg-amber-500/10 text-amber-400 border border-amber-500/30"
-                          }`}
-                        >
-                          {record.punch_type}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-slate-400 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1 text-[11px] whitespace-nowrap">
-                          {record.method === "mobile_biometric" ? (
-                            <>
-                              <Smartphone className="w-3 h-3 text-emerald-400 shrink-0" />
-                              <span className="whitespace-nowrap">Mobile Biometric</span>
-                            </>
-                          ) : (
-                            <>
-                              <Cpu className="w-3 h-3 text-cyan-400 shrink-0" />
-                              <span className="whitespace-nowrap">{record.method}</span>
-                            </>
-                          )}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                    </button>
 
-          {/* PAGINATION CONTROLS BAR */}
-          {totalPages > 1 && (
-            <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs pt-3">
-              <div className="flex items-center gap-2 text-slate-400">
-                <span>Show</span>
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    setPageSize(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="bg-slate-900 border border-slate-800 text-slate-200 rounded-lg px-2 py-0.5 text-xs focus:outline-none focus:border-emerald-500"
-                >
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                </select>
-                <span>per page</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-slate-400 font-mono text-[11px]">
-                  Page <strong className="text-white">{safePage}</strong> of{" "}
-                  <strong className="text-white">{totalPages}</strong>
-                </span>
-
-                <div className="flex items-center gap-1 ml-2">
-                  <button
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={safePage <= 1}
-                    className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    aria-label="Previous Page"
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                  </button>
-
-                  <button
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={safePage >= totalPages}
-                    className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    aria-label="Next Page"
-                  >
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={safePage >= totalPages}
+                      className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      aria-label="Next Page"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </>
+            )}
+          </>
         )}
       </div>
     </div>
