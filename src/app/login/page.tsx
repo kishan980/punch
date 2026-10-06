@@ -38,34 +38,36 @@ export default function LoginPage() {
 
     try {
       if (mode === "signup") {
-        // Sign Up Flow
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        // Instant Auto-Confirm Sign Up (No email confirmation required!)
+        const signupRes = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            password,
+            fullName,
+          }),
+        });
+
+        const signupData = await signupRes.json();
+        if (!signupRes.ok) {
+          throw new Error(signupData.error || "Failed to create account.");
+        }
+
+        setSuccess("Account created successfully! Logging you in...");
+
+        // Automatically sign in with the same email and password
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        if (signUpError) throw signUpError;
+        if (signInError) throw signInError;
 
-        if (signUpData.user) {
-          // Create profile for new user
-          const defaultCode = `GYM-${Math.floor(1000 + Math.random() * 9000)}`;
-          await supabase.from("profiles").upsert(
-            {
-              auth_user_id: signUpData.user.id,
-              full_name: fullName.trim() || email.split("@")[0],
-              member_code: defaultCode,
-              role: "member",
-              status: "active",
-            },
-            { onConflict: "auth_user_id" }
-          );
-
-          setSuccess("Account created successfully! Logging you in...");
-          setTimeout(() => {
-            router.push("/member");
-            router.refresh();
-          }, 800);
-        }
+        setTimeout(() => {
+          router.push("/member");
+          router.refresh();
+        }, 500);
       } else {
         // Login Flow
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
