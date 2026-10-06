@@ -120,25 +120,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-10 px-4 sm:px-6">
+    <div className="min-h-screen bg-white flex flex-col justify-center py-10 px-4 sm:px-6">
       <div className="max-w-md w-full mx-auto space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 mb-2">
             <Dumbbell className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-black uppercase">
             Gym Punch Demo
           </h1>
-          <p className="text-xs text-slate-500 font-medium">
+          <p className="text-sm text-slate-700 font-bold">
             Mobile Biometric Attendance with WebAuthn &amp; Supabase
           </p>
         </div>
 
         {/* Login / Sign Up Card */}
-        <div className="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 space-y-5">
+        <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
           {/* Mode Switcher */}
-          <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl text-xs font-bold">
+          <div className="grid grid-cols-2 p-1 bg-slate-200 rounded-2xl text-xs font-black">
             <button
               type="button"
               onClick={() => {
@@ -148,8 +148,8 @@ export default function LoginPage() {
               }}
               className={`py-2.5 rounded-xl transition-all ${
                 mode === "login"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500 hover:text-slate-900"
+                  ? "bg-white text-black shadow-xs font-black"
+                  : "text-slate-700 hover:text-black font-bold"
               }`}
             >
               Sign In
@@ -163,8 +163,8 @@ export default function LoginPage() {
               }}
               className={`py-2.5 rounded-xl transition-all ${
                 mode === "signup"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500 hover:text-slate-900"
+                  ? "bg-white text-black shadow-xs font-black"
+                  : "text-slate-700 hover:text-black font-bold"
               }`}
             >
               Sign Up
@@ -174,58 +174,58 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-black text-black uppercase tracking-wider mb-1.5">
                   Full Name
                 </label>
                 <div className="relative">
-                  <UserPlus className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                  <UserPlus className="w-4 h-4 text-slate-600 absolute left-3.5 top-3.5" />
                   <input
                     type="text"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Kishan Yadav"
-                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white border-2 border-slate-300 text-sm text-black placeholder-slate-500 font-bold focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-black text-black uppercase tracking-wider mb-1.5">
                 Email
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <Mail className="w-4 h-4 text-slate-600 absolute left-3.5 top-3.5" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="member@gympunch.local"
-                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white border-2 border-slate-300 text-sm text-black placeholder-slate-500 font-bold focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-black text-black uppercase tracking-wider mb-1.5">
                 Password
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <Lock className="w-4 h-4 text-slate-600 absolute left-3.5 top-3.5" />
                 <input
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-11 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                  className="w-full pl-10 pr-11 py-3 rounded-2xl bg-white border-2 border-slate-300 text-sm text-black placeholder-slate-500 font-bold focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 focus:outline-none"
+                  className="absolute right-3.5 top-3.5 text-slate-600 hover:text-black focus:outline-none"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -234,16 +234,16 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                <span className="font-semibold">{error}</span>
+              <div className="p-3.5 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-900 text-xs flex items-start gap-2.5 font-bold">
+                <AlertCircle className="w-4 h-4 text-rose-700 shrink-0 mt-0.5" />
+                <span>{error}</span>
               </div>
             )}
 
             {success && (
-              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span className="font-semibold">{success}</span>
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 text-xs flex items-center gap-2.5 font-bold">
+                <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span>{success}</span>
               </div>
             )}
 
@@ -266,8 +266,8 @@ export default function LoginPage() {
           </form>
 
           {/* Quick Demo Login Pre-sets */}
-          <div className="pt-4 border-t border-slate-100 space-y-3">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block text-center">
+          <div className="pt-4 border-t-2 border-slate-200 space-y-3">
+            <span className="text-xs font-black text-slate-800 uppercase tracking-wider block text-center">
               Quick 1-Click Demo Login
             </span>
             <div className="grid grid-cols-2 gap-2 text-xs">
@@ -278,7 +278,7 @@ export default function LoginPage() {
                   setPassword("Member@123456");
                   setMode("login");
                 }}
-                className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200 text-slate-700 font-bold transition-all"
+                className="py-2.5 px-3 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 text-black font-black transition-all"
               >
                 Member User
               </button>
@@ -289,7 +289,7 @@ export default function LoginPage() {
                   setPassword("Admin@123456");
                   setMode("login");
                 }}
-                className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200 text-slate-700 font-bold transition-all"
+                className="py-2.5 px-3 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-300 text-black font-black transition-all"
               >
                 Admin Manager
               </button>
@@ -299,7 +299,7 @@ export default function LoginPage() {
               type="button"
               onClick={handleQuickSeed}
               disabled={setupLoading}
-              className="w-full py-2 px-3 text-[11px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center justify-center gap-1.5 transition-colors"
+              className="w-full py-2 px-3 text-xs font-black text-emerald-800 hover:text-emerald-950 flex items-center justify-center gap-1.5 transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>{setupLoading ? "Initializing..." : "Reset / Seed Demo Accounts"}</span>

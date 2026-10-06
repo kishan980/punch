@@ -232,28 +232,28 @@ export default function AdminAttendanceExplorer({
       </div>
 
       <div>
-        <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight">
           Admin Attendance Explorer
         </h1>
-        <p className="text-xs text-slate-500 font-medium">
+        <p className="text-sm text-slate-700 font-semibold">
           User-wise punch analysis, live in/out tracking, and filterable punch logs.
         </p>
       </div>
 
       {/* View Mode Toggle: User-Wise vs All Logs */}
-      <div className="flex items-center gap-2 p-1 bg-white border border-slate-200/80 rounded-2xl w-fit shadow-xs">
+      <div className="flex items-center gap-2 p-1 bg-slate-100 border-2 border-slate-200 rounded-2xl w-fit shadow-xs">
         <button
           onClick={() => {
             setViewMode("user-wise");
             setCurrentPage(1);
           }}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+          className={`px-4 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2 ${
             viewMode === "user-wise"
-              ? "bg-emerald-600 text-white shadow-sm shadow-emerald-600/30"
-              : "text-slate-500 hover:text-slate-900"
+              ? "bg-emerald-600 text-white shadow-sm"
+              : "text-slate-800 hover:text-black hover:bg-slate-200"
           }`}
         >
-          <Users className="w-3.5 h-3.5" />
+          <Users className="w-4 h-4" />
           <span>User-Wise Punch Summary</span>
         </button>
 
@@ -262,23 +262,23 @@ export default function AdminAttendanceExplorer({
             setViewMode("logs");
             setCurrentPage(1);
           }}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+          className={`px-4 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2 ${
             viewMode === "logs"
-              ? "bg-emerald-600 text-white shadow-sm shadow-emerald-600/30"
-              : "text-slate-500 hover:text-slate-900"
+              ? "bg-emerald-600 text-white shadow-sm"
+              : "text-slate-800 hover:text-black hover:bg-slate-200"
           }`}
         >
-          <Clock className="w-3.5 h-3.5" />
+          <Clock className="w-4 h-4" />
           <span>All Raw Logs Stream</span>
         </button>
       </div>
 
       {/* Filter Controls Bar */}
-      <div className="bg-white border border-slate-200/80 rounded-3xl p-5 space-y-3 shadow-xs">
+      <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-3 shadow-xs">
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           {/* Member Search */}
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+            <Search className="w-4 h-4 text-slate-600 absolute left-3.5 top-3.5" />
             <input
               type="text"
               placeholder="Search member name/code..."
@@ -287,7 +287,7 @@ export default function AdminAttendanceExplorer({
                 setSearch(e.target.value);
                 handleFilterChange();
               }}
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 transition-all"
+              className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-sm text-black placeholder-slate-500 font-medium focus:outline-none focus:border-emerald-600 transition-all"
             />
           </div>
 
@@ -299,7 +299,7 @@ export default function AdminAttendanceExplorer({
                 setSelectedMember(e.target.value);
                 handleFilterChange();
               }}
-              className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 font-medium focus:outline-none focus:bg-white focus:border-emerald-600 transition-all"
+              className="w-full px-3 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-sm text-black font-semibold focus:outline-none focus:border-emerald-600 transition-all"
             >
               <option value="all">All Members ({memberOptions.length})</option>
               {memberOptions.map((m) => (
@@ -319,7 +319,7 @@ export default function AdminAttendanceExplorer({
                 setSelectedDate(e.target.value);
                 handleFilterChange();
               }}
-              className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 font-medium focus:outline-none focus:bg-white focus:border-emerald-600 transition-all"
+              className="w-full px-3 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-sm text-black font-semibold focus:outline-none focus:border-emerald-600 transition-all"
             />
           </div>
 
@@ -331,7 +331,7 @@ export default function AdminAttendanceExplorer({
                 setSelectedPunchType(e.target.value);
                 handleFilterChange();
               }}
-              className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 font-medium focus:outline-none focus:bg-white focus:border-emerald-600 transition-all"
+              className="w-full px-3 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-sm text-black font-semibold focus:outline-none focus:border-emerald-600 transition-all"
             >
               <option value="all">All Punch Types (IN &amp; OUT)</option>
               <option value="in">IN Only</option>
@@ -342,8 +342,8 @@ export default function AdminAttendanceExplorer({
 
         {/* Active Filter Pills Bar */}
         {(search || selectedMember !== "all" || selectedDate || selectedPunchType !== "all") && (
-          <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100">
-            <span className="text-slate-500">Active filters applied</span>
+          <div className="flex items-center justify-between text-sm pt-2 border-t border-slate-200">
+            <span className="text-slate-800 font-semibold">Active filters applied</span>
             <button
               onClick={() => {
                 setSearch("");
@@ -353,7 +353,7 @@ export default function AdminAttendanceExplorer({
                 setSelectedMethod("all");
                 setCurrentPage(1);
               }}
-              className="text-emerald-600 hover:underline font-bold"
+              className="text-emerald-800 hover:underline font-black"
             >
               Reset All Filters
             </button>
@@ -364,19 +364,19 @@ export default function AdminAttendanceExplorer({
       {/* MAIN DATA VIEW */}
       {viewMode === "user-wise" ? (
         /* USER-WISE VIEW */
-        <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
-              <Users className="w-4 h-4 text-emerald-600" />
+        <div className="bg-white border-2 border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b-2 border-slate-100">
+            <h2 className="text-base font-black uppercase tracking-wider text-black flex items-center gap-2">
+              <Users className="w-5 h-5 text-emerald-700" />
               <span>User-Wise Punch In &amp; Out Status</span>
             </h2>
-            <span className="text-[11px] text-slate-500">
-              Showing {paginatedUserWise.length} of {userWiseData.length} members
+            <span className="text-xs text-slate-700 font-bold">
+              Showing <strong className="text-black">{paginatedUserWise.length}</strong> of <strong className="text-black">{userWiseData.length}</strong> members
             </span>
           </div>
 
           {paginatedUserWise.length === 0 ? (
-            <p className="text-center py-12 text-xs text-slate-400">
+            <p className="text-center py-12 text-sm text-slate-600 font-semibold">
               No member attendance found for the selected filters.
             </p>
           ) : (
@@ -386,19 +386,19 @@ export default function AdminAttendanceExplorer({
                 return (
                   <div
                     key={user.memberId}
-                    className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-slate-300 transition-all space-y-3"
+                    className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-200 hover:border-slate-300 transition-all space-y-3"
                   >
                     {/* User Summary Row */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 overflow-x-auto scrollbar-thin pb-1">
                       <div className="flex items-center gap-3 shrink-0 whitespace-nowrap">
-                        <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold shrink-0">
+                        <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-black shrink-0 border border-emerald-300">
                           <User className="w-5 h-5" />
                         </div>
                         <div className="whitespace-nowrap">
-                          <div className="font-bold text-sm text-slate-900 whitespace-nowrap">
+                          <div className="font-black text-base text-black whitespace-nowrap">
                             {user.fullName}
                           </div>
-                          <div className="text-[11px] font-mono text-emerald-700 font-bold whitespace-nowrap">
+                          <div className="text-xs font-mono text-emerald-800 font-black whitespace-nowrap">
                             {user.memberCode} {user.phone ? `• ${user.phone}` : ""}
                           </div>
                         </div>
@@ -407,41 +407,41 @@ export default function AdminAttendanceExplorer({
                       {/* Status Badges in single line */}
                       <div className="flex items-center gap-2.5 shrink-0 whitespace-nowrap">
                         {/* IN Time */}
-                        <div className="p-2 rounded-xl bg-white border border-slate-200 text-center min-w-[95px] shrink-0 whitespace-nowrap shadow-2xs">
-                          <span className="text-[10px] text-slate-500 block uppercase font-bold flex items-center justify-center gap-1 whitespace-nowrap">
-                            <LogIn className="w-2.5 h-2.5 text-emerald-600" />
+                        <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-center min-w-[105px] shrink-0 whitespace-nowrap shadow-2xs">
+                          <span className="text-xs text-emerald-900 block uppercase font-black flex items-center justify-center gap-1 whitespace-nowrap">
+                            <LogIn className="w-3.5 h-3.5 text-emerald-700" />
                             <span>PUNCH IN</span>
                           </span>
-                          <span className="text-xs font-mono font-bold text-emerald-700 whitespace-nowrap">
+                          <span className="text-sm font-mono font-black text-emerald-950 whitespace-nowrap">
                             {formatTime(user.firstInTime)}
                           </span>
                         </div>
 
                         {/* OUT Time */}
-                        <div className="p-2 rounded-xl bg-white border border-slate-200 text-center min-w-[95px] shrink-0 whitespace-nowrap shadow-2xs">
-                          <span className="text-[10px] text-slate-500 block uppercase font-bold flex items-center justify-center gap-1 whitespace-nowrap">
-                            <LogOut className="w-2.5 h-2.5 text-amber-600" />
+                        <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-center min-w-[105px] shrink-0 whitespace-nowrap shadow-2xs">
+                          <span className="text-xs text-amber-900 block uppercase font-black flex items-center justify-center gap-1 whitespace-nowrap">
+                            <LogOut className="w-3.5 h-3.5 text-amber-700" />
                             <span>PUNCH OUT</span>
                           </span>
-                          <span className="text-xs font-mono font-bold text-amber-700 whitespace-nowrap">
+                          <span className="text-sm font-mono font-black text-amber-950 whitespace-nowrap">
                             {formatTime(user.lastOutTime)}
                           </span>
                         </div>
 
                         {/* Status Inside/Outside */}
-                        <div className="min-w-[95px] text-center shrink-0 whitespace-nowrap">
+                        <div className="min-w-[105px] text-center shrink-0 whitespace-nowrap">
                           {user.isInside ? (
-                            <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-300 animate-pulse whitespace-nowrap">
-                              <Activity className="w-3 h-3 text-emerald-600 shrink-0" />
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 text-white text-xs font-black border border-emerald-800 animate-pulse whitespace-nowrap">
+                              <Activity className="w-3.5 h-3.5 text-white shrink-0" />
                               <span>INSIDE GYM</span>
                             </span>
                           ) : user.lastOutTime ? (
-                            <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-[11px] font-bold border border-slate-300 whitespace-nowrap">
-                              <CheckCircle2 className="w-3 h-3 text-slate-500 shrink-0" />
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-white text-xs font-black border border-slate-900 whitespace-nowrap">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-white shrink-0" />
                               <span>COMPLETED</span>
                             </span>
                           ) : (
-                            <span className="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-500 text-[11px] font-medium whitespace-nowrap">
+                            <span className="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-xs font-bold whitespace-nowrap">
                               No punches
                             </span>
                           )}
@@ -450,7 +450,7 @@ export default function AdminAttendanceExplorer({
                         {/* Expand Button */}
                         <button
                           onClick={() => setExpandedUser(isExpanded ? null : user.memberId)}
-                          className="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shrink-0"
+                          className="p-2 rounded-xl bg-white border-2 border-slate-300 text-slate-800 hover:text-black transition-colors shrink-0 font-bold"
                           title="View all punches for this user"
                         >
                           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -460,32 +460,32 @@ export default function AdminAttendanceExplorer({
 
                     {/* Expandable Punch Log Drawer */}
                     {isExpanded && (
-                      <div className="pt-3 border-t border-slate-200/80 space-y-2 animate-fadeIn">
-                        <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                      <div className="pt-3 border-t-2 border-slate-200 space-y-2 animate-fadeIn">
+                        <div className="text-xs font-black text-black uppercase tracking-wider">
                           Full punch logs today ({user.punches.length})
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {user.punches.map((p) => (
                             <div
                               key={p.id}
-                              className={`p-2.5 rounded-xl border flex items-center justify-between text-xs ${
+                              className={`p-3 rounded-xl border flex items-center justify-between text-sm ${
                                 p.punch_type === "in"
-                                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                                  : "bg-amber-50 text-amber-800 border-amber-200"
+                                  ? "bg-emerald-600 text-white"
+                                  : "bg-amber-500 text-slate-950 font-black"
                               }`}
                             >
-                              <div className="flex items-center gap-2 font-bold">
+                              <div className="flex items-center gap-2 font-black whitespace-nowrap">
                                 {p.punch_type === "in" ? (
-                                  <LogIn className="w-3.5 h-3.5 text-emerald-600" />
+                                  <LogIn className="w-4 h-4 text-white" />
                                 ) : (
-                                  <LogOut className="w-3.5 h-3.5 text-amber-600" />
+                                  <LogOut className="w-4 h-4 text-slate-950" />
                                 )}
                                 <span>{p.punch_type.toUpperCase()}</span>
-                                <span className="text-[10px] text-slate-500 font-normal">
+                                <span className={`text-xs font-bold ${p.punch_type === "in" ? "text-emerald-100" : "text-amber-950"}`}>
                                   ({formatDate(p.punch_time)})
                                 </span>
                               </div>
-                              <span className="font-mono font-bold">
+                              <span className="font-mono font-black whitespace-nowrap">
                                 {formatTime(p.punch_time)}
                               </span>
                             </div>
@@ -500,35 +500,35 @@ export default function AdminAttendanceExplorer({
           )}
         </div>
       ) : (
-        /* ALL RAW LOGS STREAM VIEW */
-        <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-emerald-600" />
+        {/* ALL RAW LOGS STREAM VIEW */}
+        <div className="bg-white border-2 border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b-2 border-slate-100">
+            <h2 className="text-base font-black uppercase tracking-wider text-black flex items-center gap-2">
+              <Clock className="w-5 h-5 text-emerald-700" />
               <span>All Punches (Latest Insert First)</span>
             </h2>
-            <span className="text-[11px] text-slate-500">
-              Showing {paginatedLogs.length} of {filteredRecords.length} records
+            <span className="text-xs text-slate-700 font-bold">
+              Showing <strong className="text-black">{paginatedLogs.length}</strong> of <strong className="text-black">{filteredRecords.length}</strong> records
             </span>
           </div>
 
           {paginatedLogs.length === 0 ? (
-            <p className="text-center py-12 text-xs text-slate-400">
+            <p className="text-center py-12 text-sm text-slate-600 font-semibold">
               No punch records match your filter criteria.
             </p>
           ) : (
             <div className="overflow-x-auto scrollbar-thin">
-              <table className="min-w-full text-left text-xs whitespace-nowrap">
+              <table className="min-w-full text-left text-sm whitespace-nowrap">
                 <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[10px]">
-                    <th className="py-3 px-3 font-bold whitespace-nowrap">Member</th>
-                    <th className="py-3 px-3 font-bold whitespace-nowrap">Date</th>
-                    <th className="py-3 px-3 font-bold whitespace-nowrap">Time</th>
-                    <th className="py-3 px-3 font-bold whitespace-nowrap">Punch Type</th>
-                    <th className="py-3 px-3 font-bold whitespace-nowrap">Method</th>
+                  <tr className="bg-slate-100/90 border-b-2 border-slate-300 text-black uppercase tracking-wider text-xs">
+                    <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Member</th>
+                    <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Date</th>
+                    <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Time</th>
+                    <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Punch Type</th>
+                    <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Method</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-200">
                   {paginatedLogs.map((record) => {
                     const isIn = record.punch_type === "in";
                     return (
@@ -536,42 +536,42 @@ export default function AdminAttendanceExplorer({
                         key={record.id}
                         className="hover:bg-slate-50 transition-colors"
                       >
-                        <td className="py-3 px-3 font-bold text-slate-900 whitespace-nowrap">
-                          <div className="whitespace-nowrap font-bold">
+                        <td className="py-3.5 px-3.5 font-bold text-black whitespace-nowrap">
+                          <div className="whitespace-nowrap font-black text-sm text-black">
                             {record.profiles?.full_name || "Unknown Member"}
                           </div>
-                          <div className="text-[10px] font-mono text-slate-400 whitespace-nowrap">
+                          <div className="text-xs font-mono text-emerald-800 font-bold whitespace-nowrap">
                             {record.profiles?.member_code}
                           </div>
                         </td>
-                        <td className="py-3 px-3 text-slate-600 whitespace-nowrap">
+                        <td className="py-3.5 px-3.5 text-black whitespace-nowrap font-bold">
                           {formatDate(record.punch_time)}
                         </td>
-                        <td className="py-3 px-3 font-mono text-slate-900 font-bold whitespace-nowrap">
+                        <td className="py-3.5 px-3.5 font-mono text-black font-black whitespace-nowrap text-sm">
                           {formatTime(record.punch_time)}
                         </td>
-                        <td className="py-3 px-3 whitespace-nowrap">
+                        <td className="py-3.5 px-3.5 whitespace-nowrap">
                           <span
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap inline-flex items-center gap-1 ${
+                            className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider whitespace-nowrap inline-flex items-center gap-1 ${
                               isIn
-                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                : "bg-amber-50 text-amber-700 border border-amber-200"
+                                ? "bg-emerald-600 text-white"
+                                : "bg-amber-500 text-slate-950"
                             }`}
                           >
                             {record.punch_type}
                           </span>
                         </td>
-                        <td className="py-3 px-3 text-slate-600 whitespace-nowrap">
-                          <span className="inline-flex items-center gap-1.5 text-[11px] whitespace-nowrap">
+                        <td className="py-3.5 px-3.5 text-black whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1.5 text-xs whitespace-nowrap font-bold bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
                             {record.method === "mobile_biometric" ? (
                               <>
-                                <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
-                                <span className="text-emerald-800 font-medium">Mobile Biometric</span>
+                                <Smartphone className="w-4 h-4 text-emerald-700" />
+                                <span className="text-emerald-950 font-black">Mobile Biometric</span>
                               </>
                             ) : (
                               <>
-                                <Cpu className="w-3.5 h-3.5 text-cyan-600" />
-                                <span className="text-cyan-800 font-medium">{record.method}</span>
+                                <Cpu className="w-4 h-4 text-cyan-700" />
+                                <span className="text-cyan-950 font-black">{record.method}</span>
                               </>
                             )}
                           </span>
@@ -588,9 +588,9 @@ export default function AdminAttendanceExplorer({
 
       {/* PAGINATION CONTROLS BAR */}
       {totalItems > 0 && (
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-xs">
+        <div className="bg-slate-100 border-2 border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm shadow-xs">
           {/* Per Page Selector */}
-          <div className="flex items-center gap-2 text-slate-500">
+          <div className="flex items-center gap-2 text-slate-800 font-bold">
             <span>Show</span>
             <select
               value={pageSize}
@@ -598,7 +598,7 @@ export default function AdminAttendanceExplorer({
                 setPageSize(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-emerald-600"
+              className="bg-white border-2 border-slate-300 text-black rounded-lg px-2.5 py-1 text-sm font-bold focus:outline-none focus:border-emerald-600"
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -610,10 +610,10 @@ export default function AdminAttendanceExplorer({
 
           {/* Page Indicator & Navigation */}
           <div className="flex items-center gap-2">
-            <span className="text-slate-500 font-mono">
-              Page <strong className="text-slate-900">{safePage}</strong> of{" "}
-              <strong className="text-slate-900">{totalPages}</strong>
-              <span className="ml-1 text-slate-400">
+            <span className="text-slate-800 font-mono text-sm font-semibold">
+              Page <strong className="text-black text-sm font-black">{safePage}</strong> of{" "}
+              <strong className="text-black text-sm font-black">{totalPages}</strong>
+              <span className="ml-1 text-slate-600 font-bold">
                 ({totalItems} {totalItems === 1 ? "record" : "records"})
               </span>
             </span>
@@ -622,7 +622,7 @@ export default function AdminAttendanceExplorer({
               <button
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={safePage <= 1}
-                className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-xl bg-white border-2 border-slate-300 text-slate-800 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Previous Page"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -631,7 +631,7 @@ export default function AdminAttendanceExplorer({
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={safePage >= totalPages}
-                className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-xl bg-white border-2 border-slate-300 text-slate-800 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Next Page"
               >
                 <ChevronRight className="w-4 h-4" />

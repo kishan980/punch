@@ -116,20 +116,20 @@ export default function AdminMembersClient({
       </div>
 
       <div>
-        <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight">
           Member Management &amp; Today&apos;s Punches
         </h1>
-        <p className="text-xs text-slate-500 font-medium">
+        <p className="text-sm text-slate-700 font-semibold">
           User-wise biometric passkey status and live IN / OUT timestamps.
         </p>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white border border-slate-200/80 rounded-3xl p-5 space-y-3 shadow-xs">
+      <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-3 shadow-xs">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Member Search */}
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+            <Search className="w-4 h-4 text-slate-600 absolute left-3.5 top-3.5" />
             <input
               type="text"
               placeholder="Search by name, ID or phone..."
@@ -138,7 +138,7 @@ export default function AdminMembersClient({
                 setSearch(e.target.value);
                 handleFilterChange();
               }}
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all"
+              className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-sm text-black placeholder-slate-500 font-medium focus:outline-none focus:border-emerald-600 transition-all"
             />
           </div>
 
@@ -150,7 +150,7 @@ export default function AdminMembersClient({
                 setStatusFilter(e.target.value);
                 handleFilterChange();
               }}
-              className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 font-medium focus:outline-none focus:bg-white focus:border-emerald-600 transition-all"
+              className="w-full px-3 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-sm text-black font-semibold focus:outline-none focus:border-emerald-600 transition-all"
             >
               <option value="all">All Membership Status</option>
               <option value="active">Active Members</option>
@@ -166,7 +166,7 @@ export default function AdminMembersClient({
                 setBiometricFilter(e.target.value);
                 handleFilterChange();
               }}
-              className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 font-medium focus:outline-none focus:bg-white focus:border-emerald-600 transition-all"
+              className="w-full px-3 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-sm text-black font-semibold focus:outline-none focus:border-emerald-600 transition-all"
             >
               <option value="all">All Biometric Status</option>
               <option value="registered">Registered Biometric ✅</option>
@@ -176,10 +176,10 @@ export default function AdminMembersClient({
         </div>
 
         {/* Filter Stats */}
-        <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+        <div className="flex items-center justify-between text-xs text-slate-700 font-semibold pt-2 border-t border-slate-200">
           <span>
-            Showing <strong className="text-slate-900">{filteredMembers.length}</strong> of{" "}
-            <strong className="text-slate-900">{members.length}</strong> members
+            Showing <strong className="text-black">{filteredMembers.length}</strong> of{" "}
+            <strong className="text-black">{members.length}</strong> members
           </span>
           {(search || statusFilter !== "all" || biometricFilter !== "all") && (
             <button
@@ -189,7 +189,7 @@ export default function AdminMembersClient({
                 setBiometricFilter("all");
                 setCurrentPage(1);
               }}
-              className="text-xs text-emerald-600 hover:underline font-bold"
+              className="text-xs text-emerald-800 hover:underline font-black"
             >
               Reset Filters
             </button>
@@ -198,23 +198,23 @@ export default function AdminMembersClient({
       </div>
 
       {/* Member List Table */}
-      <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs space-y-4">
+      <div className="bg-white border-2 border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
         <div className="overflow-x-auto scrollbar-thin">
-          <table className="min-w-full text-left text-xs whitespace-nowrap">
+          <table className="min-w-full text-left text-sm whitespace-nowrap">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[10px]">
-                <th className="py-3 px-3 font-bold whitespace-nowrap">Member ID</th>
-                <th className="py-3 px-3 font-bold whitespace-nowrap">Name</th>
-                <th className="py-3 px-3 font-bold whitespace-nowrap">Phone</th>
-                <th className="py-3 px-3 font-bold whitespace-nowrap">Status</th>
-                <th className="py-3 px-3 font-bold whitespace-nowrap">Biometric</th>
-                <th className="py-3 px-3 font-bold whitespace-nowrap">Today&apos;s Punch IN / OUT</th>
+              <tr className="bg-slate-100/90 border-b-2 border-slate-300 text-black uppercase tracking-wider text-xs">
+                <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Member ID</th>
+                <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Name</th>
+                <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Phone</th>
+                <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Status</th>
+                <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Biometric</th>
+                <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Today&apos;s Punch IN / OUT</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-200">
               {paginatedMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-xs text-slate-400">
+                  <td colSpan={6} className="text-center py-8 text-sm text-slate-600 font-bold">
                     No members match your search criteria.
                   </td>
                 </tr>
@@ -229,60 +229,60 @@ export default function AdminMembersClient({
                       key={member.id}
                       className="hover:bg-slate-50 transition-colors"
                     >
-                      <td className="py-3.5 px-3 font-mono font-bold text-emerald-700 whitespace-nowrap">
+                      <td className="py-3.5 px-3.5 font-mono font-black text-emerald-800 whitespace-nowrap text-sm">
                         {member.member_code}
                       </td>
-                      <td className="py-3.5 px-3 font-bold text-slate-800 whitespace-nowrap">
+                      <td className="py-3.5 px-3.5 font-black text-black whitespace-nowrap text-sm">
                         {member.full_name}
                       </td>
-                      <td className="py-3.5 px-3 font-mono text-slate-500 whitespace-nowrap">
+                      <td className="py-3.5 px-3.5 font-mono font-bold text-slate-800 whitespace-nowrap text-sm">
                         {member.phone || "—"}
                       </td>
-                      <td className="py-3.5 px-3 whitespace-nowrap">
+                      <td className="py-3.5 px-3.5 whitespace-nowrap">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${
+                          className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider whitespace-nowrap ${
                             member.status === "active"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                              : "bg-rose-50 text-rose-700 border border-rose-200"
+                              ? "bg-emerald-600 text-white"
+                              : "bg-rose-600 text-white"
                           }`}
                         >
                           {member.status}
                         </span>
                       </td>
-                      <td className="py-3.5 px-3 whitespace-nowrap">
+                      <td className="py-3.5 px-3.5 whitespace-nowrap">
                         {isRegistered ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-bold whitespace-nowrap">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span className="inline-flex items-center gap-1.5 text-xs text-emerald-950 font-black bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-300 whitespace-nowrap">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
                             <span>Registered ✅</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[11px] text-slate-400 font-medium whitespace-nowrap">
-                            <XCircle className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="inline-flex items-center gap-1.5 text-xs text-slate-700 font-bold bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-300 whitespace-nowrap">
+                            <XCircle className="w-4 h-4 text-slate-500 shrink-0" />
                             <span>Not Registered</span>
                           </span>
                         )}
                       </td>
-                      <td className="py-3.5 px-3 whitespace-nowrap">
+                      <td className="py-3.5 px-3.5 whitespace-nowrap">
                         {punchData?.firstInTime ? (
-                          <div className="flex items-center gap-2 whitespace-nowrap">
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 font-mono whitespace-nowrap">
-                              <LogIn className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
+                          <div className="flex items-center gap-2.5 whitespace-nowrap">
+                            <span className="inline-flex items-center gap-1.5 text-xs font-black text-white bg-emerald-600 px-2.5 py-1 rounded-lg font-mono whitespace-nowrap shadow-2xs">
+                              <LogIn className="w-3.5 h-3.5 text-white shrink-0" />
                               <span>IN: {formatTime(punchData.firstInTime)}</span>
                             </span>
 
                             {punchData.lastOutTime ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 font-mono whitespace-nowrap">
-                                <LogOut className="w-2.5 h-2.5 text-amber-600 shrink-0" />
+                              <span className="inline-flex items-center gap-1.5 text-xs font-black text-slate-950 bg-amber-500 px-2.5 py-1 rounded-lg font-mono whitespace-nowrap shadow-2xs">
+                                <LogOut className="w-3.5 h-3.5 text-slate-950 shrink-0" />
                                 <span>OUT: {formatTime(punchData.lastOutTime)}</span>
                               </span>
                             ) : isInside ? (
-                              <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded-full border border-emerald-300 whitespace-nowrap">
+                              <span className="text-xs font-black text-white bg-emerald-700 px-3 py-1 rounded-full border border-emerald-800 whitespace-nowrap animate-pulse">
                                 INSIDE GYM
                               </span>
                             ) : null}
                           </div>
                         ) : (
-                          <span className="text-slate-400 text-[11px] whitespace-nowrap">
+                          <span className="text-slate-500 text-xs font-bold whitespace-nowrap">
                             No punches today
                           </span>
                         )}
@@ -296,9 +296,9 @@ export default function AdminMembersClient({
         </div>
 
         {/* PAGINATION CONTROLS BAR */}
-        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="bg-slate-100 border-2 border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
           {/* Per Page Selector */}
-          <div className="flex items-center gap-2 text-slate-500">
+          <div className="flex items-center gap-2 text-slate-800 font-bold">
             <span>Show</span>
             <select
               value={pageSize}
@@ -306,7 +306,7 @@ export default function AdminMembersClient({
                 setPageSize(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="bg-white border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-emerald-600"
+              className="bg-white border-2 border-slate-300 text-black rounded-lg px-2.5 py-1 text-sm font-bold focus:outline-none focus:border-emerald-600"
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -318,10 +318,10 @@ export default function AdminMembersClient({
 
           {/* Page Indicator & Navigation */}
           <div className="flex items-center gap-2">
-            <span className="text-slate-500 font-mono">
-              Page <strong className="text-slate-900">{safePage}</strong> of{" "}
-              <strong className="text-slate-900">{totalPages}</strong>
-              <span className="ml-1 text-slate-400">
+            <span className="text-slate-800 font-mono text-sm font-semibold">
+              Page <strong className="text-black text-sm font-black">{safePage}</strong> of{" "}
+              <strong className="text-black text-sm font-black">{totalPages}</strong>
+              <span className="ml-1 text-slate-600 font-bold">
                 ({totalItems} {totalItems === 1 ? "member" : "members"})
               </span>
             </span>
@@ -330,7 +330,7 @@ export default function AdminMembersClient({
               <button
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={safePage <= 1}
-                className="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-xl bg-white border-2 border-slate-300 text-slate-800 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Previous Page"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -339,7 +339,7 @@ export default function AdminMembersClient({
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={safePage >= totalPages}
-                className="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-xl bg-white border-2 border-slate-300 text-slate-800 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Next Page"
               >
                 <ChevronRight className="w-4 h-4" />

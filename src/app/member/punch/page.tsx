@@ -48,7 +48,7 @@ export default async function MemberPunchPage() {
     .order("punch_time", { ascending: false });
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <Navbar
         userRole={memberProfile.role}
         memberName={memberProfile.full_name}

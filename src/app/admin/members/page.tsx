@@ -76,7 +76,7 @@ export default async function AdminMembersPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <Navbar
         userRole="admin"
         memberName={adminProfile.full_name}

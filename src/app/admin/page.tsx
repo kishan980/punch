@@ -45,7 +45,7 @@ export default async function AdminDashboardPage() {
   const todayPunches = (todayPunchesRaw as unknown as AttendanceRecord[]) || [];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <Navbar
         userRole="admin"
         memberName={profile.full_name}
@@ -56,13 +56,13 @@ export default async function AdminDashboardPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+            <span className="text-xs font-black uppercase tracking-widest text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300">
               Admin Portal
             </span>
-            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight mt-1">
+            <h1 className="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight mt-1.5">
               GYM ADMIN
             </h1>
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-sm text-slate-700 font-semibold">
               Live attendance monitoring &amp; biometric management
             </p>
           </div>
@@ -70,13 +70,13 @@ export default async function AdminDashboardPage() {
           <div className="flex gap-2">
             <Link
               href="/admin/members"
-              className="px-3.5 py-2 rounded-xl bg-white text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors border border-slate-200 shadow-xs"
+              className="px-4 py-2 rounded-xl bg-slate-100 text-sm font-bold text-slate-900 hover:bg-slate-200 transition-colors border border-slate-300 shadow-xs"
             >
               Members
             </Link>
             <Link
               href="/admin/attendance"
-              className="px-3.5 py-2 rounded-xl bg-emerald-600 text-xs font-bold text-white hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-600/20"
+              className="px-4 py-2 rounded-xl bg-emerald-600 text-sm font-bold text-white hover:bg-emerald-700 transition-colors shadow-sm"
             >
               All Logs
             </Link>

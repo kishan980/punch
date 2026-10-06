@@ -29,7 +29,7 @@ export default async function RegisterBiometricPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <Navbar
         userRole={profile?.role || "member"}
         memberName={profile?.full_name}
@@ -40,21 +40,21 @@ export default async function RegisterBiometricPage() {
         <div className="flex items-center justify-between">
           <Link
             href="/member"
-            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 font-semibold transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-slate-800 hover:text-black font-bold transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Dashboard</span>
           </Link>
-          <span className="text-[10px] font-mono text-emerald-700 font-bold uppercase tracking-widest bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+          <span className="text-xs font-mono text-emerald-800 font-black uppercase tracking-widest bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300">
             Passkey Security
           </span>
         </div>
 
         <div className="space-y-1">
-          <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">
+          <h1 className="text-2xl font-black text-black uppercase tracking-tight">
             Register Biometric Device
           </h1>
-          <p className="text-xs text-slate-500 font-medium">
+          <p className="text-sm text-slate-700 font-semibold">
             Link this phone&apos;s native Face ID or Fingerprint for instant attendance punching.
           </p>
         </div>
@@ -64,9 +64,9 @@ export default async function RegisterBiometricPage() {
 
         {/* List of Registered Credentials */}
         {credentials && credentials.length > 0 && (
-          <div className="bg-white border border-slate-200/80 rounded-3xl p-5 space-y-3 shadow-xs">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          <div className="bg-white border-2 border-slate-200 rounded-3xl p-5 space-y-3 shadow-sm">
+            <h3 className="text-xs font-black uppercase tracking-wider text-black flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-700" />
               <span>Registered Authenticators ({credentials.length})</span>
             </h3>
 
@@ -74,28 +74,28 @@ export default async function RegisterBiometricPage() {
               {credentials.map((cred, idx) => (
                 <div
                   key={cred.id}
-                  className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs"
+                  className="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-200 flex items-center justify-between text-sm"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
-                      <Smartphone className="w-4 h-4" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-800">
+                      <Smartphone className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="font-bold text-slate-800">
+                      <div className="font-black text-black text-sm">
                         Device #{idx + 1} (Passkey)
                       </div>
-                      <div className="text-[10px] font-mono text-slate-400">
+                      <div className="text-xs font-mono text-slate-600 font-bold">
                         ID: {cred.credential_id.slice(0, 16)}...
                       </div>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <div className="inline-flex items-center gap-1 text-[10px] text-emerald-700 font-bold">
-                      <CheckCircle className="w-3 h-3 text-emerald-600" />
+                    <div className="inline-flex items-center gap-1 text-xs text-emerald-800 font-black bg-emerald-100 px-2 py-0.5 rounded-md">
+                      <CheckCircle className="w-3.5 h-3.5 text-emerald-700" />
                       <span>Active</span>
                     </div>
-                    <div className="text-[10px] text-slate-400">
+                    <div className="text-xs font-mono text-slate-600 font-bold mt-1">
                       {new Date(cred.created_at).toLocaleDateString()}
                     </div>
                   </div>
