@@ -599,7 +599,7 @@ export default function AdminAttendanceExplorer({
       )}
 
       {/* PAGINATION CONTROLS BAR */}
-      {totalPages > 1 && (
+      {totalItems > 0 && (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           {/* Per Page Selector */}
           <div className="flex items-center gap-2 text-slate-400">
@@ -625,6 +625,9 @@ export default function AdminAttendanceExplorer({
             <span className="text-slate-400 font-mono">
               Page <strong className="text-white">{safePage}</strong> of{" "}
               <strong className="text-white">{totalPages}</strong>
+              <span className="ml-1 text-slate-500">
+                ({totalItems} {totalItems === 1 ? "record" : "records"})
+              </span>
             </span>
 
             <div className="flex items-center gap-1.5 ml-2">

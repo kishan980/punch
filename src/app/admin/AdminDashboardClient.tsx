@@ -11,6 +11,8 @@ import {
   Smartphone,
   Cpu,
   Radio,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import type { AttendanceRecord, Profile } from "@/types/attendance";
 import { createClient } from "@/lib/supabase/client";
@@ -102,6 +104,13 @@ export default function AdminDashboardClient({
     }
   };
 
+  // Pagination state for Today's Live Punches table
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const totalPages = Math.max(1, Math.ceil(punches.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedPunches = punches.slice((safePage - 1) * pageSize, safePage * pageSize);
+
   return (
     <div className="space-y-6">
       {/* Live Activity Notification Banner */}
@@ -182,7 +191,7 @@ export default function AdminDashboardClient({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50">
-                {punches.slice(0, 15).map((record) => {
+                {paginatedPunches.map((record) => {
                   const isIn = record.punch_type === "in";
                   return (
                     <tr
@@ -230,6 +239,57 @@ export default function AdminDashboardClient({
               </tbody>
             </table>
           </div>
+
+          {/* PAGINATION CONTROLS BAR */}
+          {totalPages > 1 && (
+            <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs pt-3">
+              <div className="flex items-center gap-2 text-slate-400">
+                <span>Show</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="bg-slate-900 border border-slate-800 text-slate-200 rounded-lg px-2 py-0.5 text-xs focus:outline-none focus:border-emerald-500"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+                <span>per page</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400 font-mono text-[11px]">
+                  Page <strong className="text-white">{safePage}</strong> of{" "}
+                  <strong className="text-white">{totalPages}</strong>
+                </span>
+
+                <div className="flex items-center gap-1 ml-2">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={safePage <= 1}
+                    className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Previous Page"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={safePage >= totalPages}
+                    className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Next Page"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
         )}
       </div>
     </div>
