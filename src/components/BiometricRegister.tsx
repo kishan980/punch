@@ -95,7 +95,7 @@ export default function BiometricRegister({
           throw new Error("Biometric authentication cancelled.");
         }
         if (err.name === "NotSupportedError") {
-          throw new Error("Screen lock / Fingerprint is not set up on this device. Please add a Fingerprint or Screen Lock in your phone's Android Settings first.");
+          throw new Error("OnePlus / Android Security Notice: Please make sure 'Screen lock' (PIN/Password) and Fingerprint are active in OnePlus Settings. If using private/incognito mode, open in normal Chrome tab.");
         }
         throw new Error(err.message || "Biometric registration was declined or failed.");
       }
