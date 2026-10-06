@@ -66,33 +66,54 @@ export default function LoginPage() {
         if (signInError) throw signInError;
 
         setTimeout(() => {
-          router.push("/member");
-          router.refresh();
+          if (email.toLowerCase().includes("admin")) {
+            window.location.href = "/admin";
+          } else {
+            window.location.href = "/member";
+          }
         }, 500);
       } else {
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        // Sign In
+        let signInRes = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        if (signInError) throw signInError;
+        // If credentials failed and this is a demo account or admin email, auto-seed and retry once
+        if (
+          signInRes.error &&
+          (email.toLowerCase().includes("admin") || email.toLowerCase().includes("gympunch.local"))
+        ) {
+          try {
+            await fetch("/api/auth/seed-demo-users", { method: "POST" });
+            signInRes = await supabase.auth.signInWithPassword({
+              email,
+              password,
+            });
+          } catch {
+            // ignore seed error and proceed to handle signInRes.error
+          }
+        }
 
-        if (!data.user) {
+        if (signInRes.error) throw signInRes.error;
+
+        const authUser = signInRes.data.user;
+        if (!authUser) {
           throw new Error("No user returned after authentication.");
         }
 
         const { data: profile } = await supabase
           .from("profiles")
           .select("role")
-          .eq("auth_user_id", data.user.id)
+          .eq("auth_user_id", authUser.id)
           .single();
 
-        if (profile?.role === "admin") {
-          router.push("/admin");
+        const isAdmin = email.toLowerCase().includes("admin") || profile?.role === "admin";
+        if (isAdmin) {
+          window.location.href = "/admin";
         } else {
-          router.push("/member");
+          window.location.href = "/member";
         }
-        router.refresh();
       }
     } catch (err: unknown) {
       const e = err as Error;

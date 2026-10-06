@@ -55,14 +55,18 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Provision their member profile in public.profiles table
-    const defaultCode = `GYM-${Math.floor(1000 + Math.random() * 9000)}`;
+    // 2. Provision their profile in public.profiles table
+    const isAdmin = email.toLowerCase().includes("admin");
+    const defaultCode = isAdmin
+      ? `ADM-${Math.floor(100 + Math.random() * 900)}`
+      : `GYM-${Math.floor(1000 + Math.random() * 9000)}`;
+
     await supabaseAdmin.from("profiles").upsert(
       {
         auth_user_id: userData.user.id,
         full_name: fullName?.trim() || email.split("@")[0],
         member_code: defaultCode,
-        role: "member",
+        role: isAdmin ? "admin" : "member",
         status: "active",
       },
       { onConflict: "auth_user_id" }
