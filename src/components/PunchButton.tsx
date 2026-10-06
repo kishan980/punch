@@ -192,30 +192,30 @@ export default function PunchButton({
 
       {/* Loading state indicator */}
       {statusMessage && (
-        <div className="mt-4 p-3.5 rounded-2xl bg-slate-900 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-3 shadow-lg">
-          <Loader2 className="w-4 h-4 animate-spin shrink-0 text-emerald-400" />
-          <span className="font-medium">{statusMessage}</span>
+        <div className="mt-4 p-3.5 rounded-2xl bg-white border border-emerald-300 text-emerald-800 text-xs flex items-center gap-3 shadow-md">
+          <Loader2 className="w-4 h-4 animate-spin shrink-0 text-emerald-600" />
+          <span className="font-semibold">{statusMessage}</span>
         </div>
       )}
 
       {/* Success notification */}
       {successMessage && (
-        <div className="mt-4 w-full p-4 rounded-2xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-200 text-xs flex items-center gap-3 shadow-xl">
-          <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" />
+        <div className="mt-4 w-full p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs flex items-center gap-3 shadow-md">
+          <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
           <span className="font-bold text-sm">{successMessage}</span>
         </div>
       )}
 
       {/* Error notification */}
       {errorMessage && (
-        <div className="mt-4 w-full p-4 rounded-2xl bg-rose-950/80 border border-rose-500/50 text-rose-200 text-xs flex items-start gap-3 shadow-xl">
-          <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+        <div className="mt-4 w-full p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-800 text-xs flex items-start gap-3 shadow-md">
+          <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
           <div>
-            <div className="font-bold text-rose-100">{errorMessage}</div>
+            <div className="font-bold text-rose-900">{errorMessage}</div>
             {errorMessage.includes("register this phone") && (
               <a
                 href="/member/register-biometric"
-                className="mt-1.5 text-xs text-emerald-400 underline block hover:text-emerald-300 font-semibold"
+                className="mt-1.5 text-xs text-emerald-600 underline block hover:text-emerald-800 font-bold"
               >
                 Go to Biometric Registration &rarr;
               </a>

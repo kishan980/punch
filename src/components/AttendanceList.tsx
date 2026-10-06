@@ -30,7 +30,7 @@ export default function AttendanceList({
 
   if (!records || records.length === 0) {
     return (
-      <div className="p-6 text-center rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400 text-xs">
+      <div className="p-6 text-center rounded-2xl bg-white border border-slate-200 text-slate-400 text-xs shadow-xs">
         No attendance recorded yet.
       </div>
     );
@@ -66,35 +66,35 @@ export default function AttendanceList({
     switch (method) {
       case "mobile_biometric":
         return (
-          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-medium whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 font-bold whitespace-nowrap">
             <Smartphone className="w-3 h-3 shrink-0" />
             <span>Mobile Biometric</span>
           </span>
         );
       case "biometric_machine":
         return (
-          <span className="inline-flex items-center gap-1 text-[10px] text-cyan-400 font-medium whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 text-[10px] text-cyan-700 font-bold whitespace-nowrap">
             <Cpu className="w-3 h-3 shrink-0" />
             <span>Physical Scanner</span>
           </span>
         );
       case "qr":
         return (
-          <span className="inline-flex items-center gap-1 text-[10px] text-amber-400 font-medium whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 text-[10px] text-amber-700 font-bold whitespace-nowrap">
             <QrCode className="w-3 h-3 shrink-0" />
             <span>QR Code</span>
           </span>
         );
       case "admin":
         return (
-          <span className="inline-flex items-center gap-1 text-[10px] text-purple-400 font-medium whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 text-[10px] text-purple-700 font-bold whitespace-nowrap">
             <Shield className="w-3 h-3 shrink-0" />
             <span>Admin Punch</span>
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 text-[10px] text-slate-400 font-medium whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 text-[10px] text-slate-500 font-medium whitespace-nowrap">
             <span>{method}</span>
           </span>
         );
@@ -117,24 +117,26 @@ export default function AttendanceList({
           return (
             <div
               key={record.id}
-              className={`p-3.5 rounded-2xl border flex items-center justify-between transition-all ${
+              className={`p-3.5 rounded-2xl border flex items-center justify-between transition-all shadow-xs ${
                 isIn
-                  ? "bg-emerald-950/20 border-emerald-500/20"
-                  : "bg-amber-950/20 border-amber-500/20"
+                  ? "bg-emerald-50/70 border-emerald-200"
+                  : "bg-amber-50/70 border-amber-200"
               }`}
             >
               <div className="flex items-center gap-3">
                 <div
                   className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                     isIn
-                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                      : "bg-amber-500/10 text-amber-400 border border-amber-500/30"
+                      ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
+                      : "bg-amber-100 text-amber-700 border border-amber-300"
                   }`}
                 >
                   {isIn ? <LogIn className="w-4 h-4" /> : <LogOut className="w-4 h-4" />}
                 </div>
                 <div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-200">
+                  <div className={`text-xs font-black uppercase tracking-wider ${
+                    isIn ? "text-emerald-950" : "text-amber-950"
+                  }`}>
                     {isIn ? "PUNCH IN" : "PUNCH OUT"}
                   </div>
                   <div>{getMethodBadge(record.method)}</div>
@@ -142,11 +144,11 @@ export default function AttendanceList({
               </div>
 
               <div className="text-right">
-                <div className="text-sm font-mono font-bold text-white">
+                <div className="text-sm font-mono font-bold text-slate-900">
                   {formatTime(record.punch_time)}
                 </div>
-                <div className="text-[10px] text-slate-400 flex items-center justify-end gap-1">
-                  <CheckCircle className="w-2.5 h-2.5 text-emerald-400" />
+                <div className="text-[10px] text-emerald-600 font-bold flex items-center justify-end gap-1">
+                  <CheckCircle className="w-2.5 h-2.5 text-emerald-600" />
                   <span>Verified</span>
                 </div>
               </div>
@@ -179,13 +181,13 @@ export default function AttendanceList({
 
   return (
     <div className="space-y-6">
-      {/* Day Gruped Items */}
+      {/* Day Grouped Items */}
       <div className="space-y-6">
         {paginatedDateKeys.map((dateLabel) => {
           const dayRecords = groupedByDate[dateLabel];
           return (
             <div key={dateLabel} className="space-y-2">
-              <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 px-1">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-500 px-1">
                 {dateLabel}
               </div>
               <div className="space-y-2">
@@ -194,14 +196,14 @@ export default function AttendanceList({
                   return (
                     <div
                       key={record.id}
-                      className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between"
+                      className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between"
                     >
                       <div className="flex items-center gap-3">
                         <div
                           className={`w-8 h-8 rounded-xl flex items-center justify-center ${
                             isIn
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                              ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                              : "bg-amber-50 text-amber-600 border border-amber-200"
                           }`}
                         >
                           {isIn ? (
@@ -213,7 +215,7 @@ export default function AttendanceList({
                         <div>
                           <span
                             className={`text-xs font-bold mr-2 ${
-                              isIn ? "text-emerald-400" : "text-amber-400"
+                              isIn ? "text-emerald-700" : "text-amber-700"
                             }`}
                           >
                             {isIn ? "IN" : "OUT"}
@@ -222,7 +224,7 @@ export default function AttendanceList({
                         </div>
                       </div>
 
-                      <div className="text-right font-mono text-xs font-semibold text-slate-200">
+                      <div className="text-right font-mono text-xs font-bold text-slate-800">
                         {formatTime(record.punch_time)}
                       </div>
                     </div>
@@ -235,8 +237,8 @@ export default function AttendanceList({
       </div>
 
       {/* Pagination Controls Bar */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2 text-slate-400">
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-xs">
+        <div className="flex items-center gap-2 text-slate-500">
           <span>Show</span>
           <select
             value={pageSize}
@@ -244,7 +246,7 @@ export default function AttendanceList({
               setPageSize(Number(e.target.value));
               setCurrentPage(1);
             }}
-            className="bg-slate-950 border border-slate-800 text-slate-200 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-emerald-500"
+            className="bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-emerald-600"
           >
             <option value={5}>5 days</option>
             <option value={10}>10 days</option>
@@ -254,10 +256,10 @@ export default function AttendanceList({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-slate-400 font-mono">
-            Page <strong className="text-white">{safePage}</strong> of{" "}
-            <strong className="text-white">{totalPages}</strong>
-            <span className="ml-1 text-slate-500">
+          <span className="text-slate-500 font-mono">
+            Page <strong className="text-slate-900">{safePage}</strong> of{" "}
+            <strong className="text-slate-900">{totalPages}</strong>
+            <span className="ml-1 text-slate-400">
               ({totalDays} {totalDays === 1 ? "day" : "days"})
             </span>
           </span>
@@ -266,7 +268,7 @@ export default function AttendanceList({
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={safePage <= 1}
-              className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               aria-label="Previous Page"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -275,7 +277,7 @@ export default function AttendanceList({
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={safePage >= totalPages}
-              className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               aria-label="Next Page"
             >
               <ChevronRight className="w-4 h-4" />

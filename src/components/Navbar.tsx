@@ -23,17 +23,17 @@ export default function Navbar({ userRole = "member", memberName, memberCode }: 
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
       <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
-        <Link href={userRole === "admin" ? "/admin" : "/member"} className="flex items-center gap-2 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-950/40 group-hover:scale-105 transition-transform">
+        <Link href={userRole === "admin" ? "/admin" : "/member"} className="flex items-center gap-2.5 group">
+          <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
             <Dumbbell className="w-5 h-5" />
           </div>
           <div>
-            <span className="font-black text-sm tracking-wide text-white uppercase block leading-none">
+            <span className="font-black text-sm tracking-wide text-slate-900 uppercase block leading-none">
               IronVault
             </span>
-            <span className="text-[10px] text-emerald-400 font-semibold tracking-wider uppercase block mt-0.5">
+            <span className="text-[10px] text-emerald-600 font-bold tracking-wider uppercase block mt-0.5">
               Biometric Punch
             </span>
           </div>
@@ -42,15 +42,15 @@ export default function Navbar({ userRole = "member", memberName, memberCode }: 
         <div className="flex items-center gap-3">
           {memberCode && (
             <div className="text-right hidden sm:block">
-              <div className="text-xs font-semibold text-slate-200">{memberName || "Member"}</div>
-              <div className="text-[10px] font-mono text-emerald-400">{memberCode}</div>
+              <div className="text-xs font-bold text-slate-800">{memberName || "Member"}</div>
+              <div className="text-[10px] font-mono font-bold text-emerald-600">{memberCode}</div>
             </div>
           )}
 
           <button
             onClick={handleLogout}
             title="Sign out"
-            className="p-2 rounded-lg bg-slate-800/80 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-slate-700/60 transition-colors"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-slate-200 transition-colors"
           >
             <LogOut className="w-4 h-4" />
           </button>
@@ -58,15 +58,15 @@ export default function Navbar({ userRole = "member", memberName, memberCode }: 
       </div>
 
       {/* Mobile Subnav */}
-      <nav className="max-w-md mx-auto px-4 pb-2 pt-1 flex items-center justify-around text-xs border-t border-slate-800/50">
+      <nav className="max-w-md mx-auto px-4 pb-2 pt-1 flex items-center justify-around text-xs border-t border-slate-100">
         {userRole === "admin" ? (
           <>
             <Link
               href="/admin"
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors ${
                 pathname === "/admin"
-                  ? "bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -74,10 +74,10 @@ export default function Navbar({ userRole = "member", memberName, memberCode }: 
             </Link>
             <Link
               href="/admin/members"
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors ${
                 pathname === "/admin/members"
-                  ? "bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               <UserCheck className="w-3.5 h-3.5" />
@@ -85,10 +85,10 @@ export default function Navbar({ userRole = "member", memberName, memberCode }: 
             </Link>
             <Link
               href="/admin/attendance"
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors ${
                 pathname === "/admin/attendance"
-                  ? "bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               <CalendarCheck className="w-3.5 h-3.5" />
@@ -99,10 +99,10 @@ export default function Navbar({ userRole = "member", memberName, memberCode }: 
           <>
             <Link
               href="/member"
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors ${
                 pathname === "/member" || pathname === "/member/punch"
-                  ? "bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               <Fingerprint className="w-3.5 h-3.5" />
@@ -110,10 +110,10 @@ export default function Navbar({ userRole = "member", memberName, memberCode }: 
             </Link>
             <Link
               href="/member/register-biometric"
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors ${
                 pathname === "/member/register-biometric"
-                  ? "bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -121,10 +121,10 @@ export default function Navbar({ userRole = "member", memberName, memberCode }: 
             </Link>
             <Link
               href="/member/attendance"
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+              className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors ${
                 pathname === "/member/attendance"
-                  ? "bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               <CalendarCheck className="w-3.5 h-3.5" />

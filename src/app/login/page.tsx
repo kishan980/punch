@@ -41,7 +41,6 @@ export default function LoginPage() {
 
     try {
       if (mode === "signup") {
-        // Instant Auto-Confirm Sign Up (No email confirmation required!)
         const signupRes = await fetch("/api/auth/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -59,7 +58,6 @@ export default function LoginPage() {
 
         setSuccess("Account created successfully! Logging you in...");
 
-        // Automatically sign in with the same email and password
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -72,7 +70,6 @@ export default function LoginPage() {
           router.refresh();
         }, 500);
       } else {
-        // Login Flow
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -84,7 +81,6 @@ export default function LoginPage() {
           throw new Error("No user returned after authentication.");
         }
 
-        // Fetch user profile to redirect properly
         const { data: profile } = await supabase
           .from("profiles")
           .select("role")
@@ -99,86 +95,50 @@ export default function LoginPage() {
         router.refresh();
       }
     } catch (err: unknown) {
-      const authErr = err as Error;
-      if (authErr.message?.includes("Invalid login credentials")) {
-        setError(
-          "User does not exist in Supabase yet. Click the 'Auto-Create Demo Accounts' button below to create it in 1 second!"
-        );
-      } else {
-        setError(authErr.message || "Authentication failed. Please try again.");
-      }
+      const e = err as Error;
+      setError(e.message || "Authentication failed. Please check credentials.");
     } finally {
       setLoading(false);
     }
   };
 
-  // 1-Click Instant Demo Accounts Creator
-  const handleAutoCreateDemoAccounts = async (targetRole: "member" | "admin" = "member") => {
+  const handleQuickSeed = async () => {
     setSetupLoading(true);
     setError(null);
     setSuccess(null);
-
     try {
-      const res = await fetch("/api/auth/demo-setup", {
-        method: "POST",
-      });
-
-      const resData = await res.json();
-      if (!res.ok) {
-        throw new Error(resData.error || "Failed to initialize demo accounts.");
-      }
-
-      const targetEmail = targetRole === "admin" ? "admin@gympunch.local" : "member@gympunch.local";
-      const targetPass = targetRole === "admin" ? "admin123456" : "member123456";
-
-      setEmail(targetEmail);
-      setPassword(targetPass);
-      setSuccess("Demo accounts created in Supabase! Logging in now...");
-
-      // Automatically log in
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: targetEmail,
-        password: targetPass,
-      });
-
-      if (signInError) throw signInError;
-
-      setTimeout(() => {
-        if (targetRole === "admin") {
-          router.push("/admin");
-        } else {
-          router.push("/member");
-        }
-        router.refresh();
-      }, 500);
+      const res = await fetch("/api/auth/seed-demo-users", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Seeding failed.");
+      setSuccess("Demo accounts ready! Click Admin or Member to quick-login.");
     } catch (err: unknown) {
-      const error = err as Error;
-      setError(error.message || "Failed to auto-create demo users.");
+      const e = err as Error;
+      setError(e.message || "Failed to initialize demo accounts.");
     } finally {
       setSetupLoading(false);
     }
   };
 
   return (
-    <main className="mobile-container justify-center py-10">
-      <div className="w-full max-w-sm mx-auto space-y-6">
-        {/* Header Branding */}
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-10 px-4 sm:px-6">
+      <div className="max-w-md w-full mx-auto space-y-6">
+        {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-600 to-teal-400 items-center justify-center text-white shadow-xl shadow-emerald-950/60 mb-2">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 mb-2">
             <Dumbbell className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-white uppercase">
+          <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
             Gym Punch Demo
           </h1>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500 font-medium">
             Mobile Biometric Attendance with WebAuthn &amp; Supabase
           </p>
         </div>
 
         {/* Login / Sign Up Card */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5">
+        <div className="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 space-y-5">
           {/* Mode Switcher */}
-          <div className="grid grid-cols-2 p-1 bg-slate-950 rounded-xl border border-slate-800/80 text-xs">
+          <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl text-xs font-bold">
             <button
               type="button"
               onClick={() => {
@@ -186,10 +146,10 @@ export default function LoginPage() {
                 setError(null);
                 setSuccess(null);
               }}
-              className={`py-2 rounded-lg font-bold transition-colors ${
+              className={`py-2.5 rounded-xl transition-all ${
                 mode === "login"
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               Sign In
@@ -201,10 +161,10 @@ export default function LoginPage() {
                 setError(null);
                 setSuccess(null);
               }}
-              className={`py-2 rounded-lg font-bold transition-colors ${
+              className={`py-2.5 rounded-xl transition-all ${
                 mode === "signup"
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               Sign Up
@@ -214,142 +174,139 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   Full Name
                 </label>
                 <div className="relative">
-                  <UserPlus className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                  <UserPlus className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                   <input
                     type="text"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Kishan Yadav"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Email
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="member@gympunch.local"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Password
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-11 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors"
+                  className="w-full pl-10 pr-11 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300 transition-colors focus:outline-none"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 focus:outline-none"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4 text-emerald-400" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className="p-3.5 rounded-xl bg-rose-950/60 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                <span>{error}</span>
+              <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <span className="font-semibold">{error}</span>
               </div>
             )}
 
             {success && (
-              <div className="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>{success}</span>
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="font-semibold">{success}</span>
               </div>
             )}
 
             <button
               type="submit"
-              disabled={loading || setupLoading}
-              className="w-full py-3.5 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-lg shadow-emerald-950/50 active:scale-[0.98] transition-all disabled:opacity-60"
+              disabled={loading}
+              className="w-full py-3.5 px-4 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/25 active:scale-[0.98] transition-all disabled:opacity-50"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>{mode === "signup" ? "CREATING ACCOUNT..." : "AUTHENTICATING..."}</span>
+                  <span>Processing...</span>
                 </>
+              ) : mode === "signup" ? (
+                <span>Create Account &amp; Login</span>
               ) : (
-                <span>{mode === "signup" ? "CREATE ACCOUNT" : "LOGIN"}</span>
+                <span>Sign In to Terminal</span>
               )}
             </button>
           </form>
 
-          {/* 1-Click Instant Setup Section */}
-          <div className="pt-4 border-t border-slate-800 space-y-3">
-            <div className="text-center">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
-                Instant Demo One-Click Setup
-              </span>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                Automatically creates test users in your Supabase database:
-              </p>
-            </div>
-
+          {/* Quick Demo Login Pre-sets */}
+          <div className="pt-4 border-t border-slate-100 space-y-3">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block text-center">
+              Quick 1-Click Demo Login
+            </span>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <button
                 type="button"
-                disabled={setupLoading || loading}
-                onClick={() => handleAutoCreateDemoAccounts("member")}
-                className="py-2.5 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold text-left transition-all flex items-center gap-2 disabled:opacity-60 active:scale-[0.98]"
+                onClick={() => {
+                  setEmail("member@gympunch.local");
+                  setPassword("Member@123456");
+                  setMode("login");
+                }}
+                className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200 text-slate-700 font-bold transition-all"
               >
-                {setupLoading ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Fingerprint className="w-3.5 h-3.5" />
-                )}
-                <span>1-Click Member</span>
+                Member User
               </button>
-
               <button
                 type="button"
-                disabled={setupLoading || loading}
-                onClick={() => handleAutoCreateDemoAccounts("admin")}
-                className="py-2.5 px-3 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 font-semibold text-left transition-all flex items-center gap-2 disabled:opacity-60 active:scale-[0.98]"
+                onClick={() => {
+                  setEmail("admin@gympunch.local");
+                  setPassword("Admin@123456");
+                  setMode("login");
+                }}
+                className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200 text-slate-700 font-bold transition-all"
               >
-                {setupLoading ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Sparkles className="w-3.5 h-3.5" />
-                )}
-                <span>1-Click Admin</span>
+                Admin Manager
               </button>
             </div>
+
+            <button
+              type="button"
+              onClick={handleQuickSeed}
+              disabled={setupLoading}
+              className="w-full py-2 px-3 text-[11px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{setupLoading ? "Initializing..." : "Reset / Seed Demo Accounts"}</span>
+            </button>
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

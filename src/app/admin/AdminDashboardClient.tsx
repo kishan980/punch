@@ -6,7 +6,6 @@ import {
   Users,
   Fingerprint,
   Activity,
-  ArrowRight,
   Clock,
   Smartphone,
   Cpu,
@@ -61,16 +60,25 @@ export default function AdminDashboardClient({
             newRecord.profiles = memberProfile;
           }
 
-          // Sound alert for admin terminal
+          // Sound alert on live scan
           soundEffects.playPunchSuccess();
 
-          // Flash live toast notice
-          setLiveEventNotice(
-            `Live Punch: ${newRecord.profiles?.full_name || "Member"} just punched ${newRecord.punch_type.toUpperCase()}!`
-          );
-          setTimeout(() => setLiveEventNotice(null), 4000);
+          setPunches((prev) => [
+            newRecord,
+            ...prev.filter((p) => p.id !== newRecord.id),
+          ]);
 
-          setPunches((prev) => [newRecord, ...prev]);
+          const action = newRecord.punch_type === "in" ? "PUNCHED IN" : "PUNCHED OUT";
+          setLiveEventNotice(
+            `🔔 ${newRecord.profiles?.full_name || "Member"} ${action} at ${new Date(
+              newRecord.punch_time
+            ).toLocaleTimeString()}`
+          );
+
+          // Clear notice after 5 seconds
+          setTimeout(() => {
+            setLiveEventNotice(null);
+          }, 5000);
         }
       )
       .subscribe();
@@ -115,68 +123,68 @@ export default function AdminDashboardClient({
     <div className="space-y-6">
       {/* Live Activity Notification Banner */}
       {liveEventNotice && (
-        <div className="p-3.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-3 animate-bounce-short shadow-xl">
-          <Radio className="w-4 h-4 text-emerald-400 animate-pulse shrink-0" />
+        <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold flex items-center gap-3 shadow-md">
+          <Radio className="w-4 h-4 text-emerald-600 animate-pulse shrink-0" />
           <span>{liveEventNotice}</span>
         </div>
       )}
 
       {/* Top 3 KPI Metric Cards */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
-          <div className="flex items-center gap-2 text-slate-400 mb-1">
-            <Users className="w-4 h-4 text-emerald-400" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs">
+          <div className="flex items-center gap-2 text-slate-500 mb-1">
+            <Users className="w-4 h-4 text-emerald-600" />
+            <span className="text-[11px] font-bold uppercase tracking-wider">
               Members
             </span>
           </div>
-          <div className="text-2xl font-black text-white font-mono">
+          <div className="text-2xl sm:text-3xl font-black text-slate-900 font-mono">
             {totalMembers}
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
-          <div className="flex items-center gap-2 text-slate-400 mb-1">
-            <Fingerprint className="w-4 h-4 text-teal-400" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs">
+          <div className="flex items-center gap-2 text-slate-500 mb-1">
+            <Fingerprint className="w-4 h-4 text-teal-600" />
+            <span className="text-[11px] font-bold uppercase tracking-wider">
               Today&apos;s Punches
             </span>
           </div>
-          <div className="text-2xl font-black text-white font-mono">
+          <div className="text-2xl sm:text-3xl font-black text-slate-900 font-mono">
             {punches.length}
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
-          <div className="flex items-center gap-2 text-slate-400 mb-1">
-            <Activity className="w-4 h-4 text-amber-400" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs">
+          <div className="flex items-center gap-2 text-slate-500 mb-1">
+            <Activity className="w-4 h-4 text-emerald-600" />
+            <span className="text-[11px] font-bold uppercase tracking-wider">
               Inside Now
             </span>
           </div>
-          <div className="text-2xl font-black text-emerald-400 font-mono">
+          <div className="text-2xl sm:text-3xl font-black text-emerald-600 font-mono">
             {currentlyInsideCount}
           </div>
         </div>
       </div>
 
       {/* Today's Attendance Table with Live Stream */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+      <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
+            <Clock className="w-4 h-4 text-emerald-600" />
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">
               Today&apos;s Live Punches
             </h2>
           </div>
-          <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-400 font-semibold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
             <span>REALTIME</span>
           </span>
         </div>
 
         {punches.length === 0 ? (
-          <p className="text-center py-8 text-xs text-slate-500">
+          <p className="text-center py-8 text-xs text-slate-400">
             No punches recorded today yet.
           </p>
         ) : (
@@ -184,52 +192,52 @@ export default function AdminDashboardClient({
             <div className="overflow-x-auto scrollbar-thin">
               <table className="min-w-full text-left text-xs whitespace-nowrap">
                 <thead>
-                  <tr className="border-b border-slate-800/80 text-slate-400 uppercase tracking-wider text-[10px]">
+                  <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[10px]">
                     <th className="py-2.5 px-3 font-bold whitespace-nowrap">Member</th>
                     <th className="py-2.5 px-3 font-bold whitespace-nowrap">Time</th>
                     <th className="py-2.5 px-3 font-bold whitespace-nowrap">Type</th>
                     <th className="py-2.5 px-3 font-bold whitespace-nowrap">Method</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/50">
+                <tbody className="divide-y divide-slate-100">
                   {paginatedPunches.map((record) => {
                     const isIn = record.punch_type === "in";
                     return (
                       <tr
                         key={record.id}
-                        className="hover:bg-slate-800/30 transition-colors animate-fadeIn"
+                        className="hover:bg-slate-50 transition-colors"
                       >
-                        <td className="py-3 px-3 font-semibold text-slate-200 whitespace-nowrap">
+                        <td className="py-3 px-3 font-bold text-slate-900 whitespace-nowrap">
                           <div className="whitespace-nowrap">{record.profiles?.full_name || "Unknown Member"}</div>
-                          <div className="text-[10px] font-mono text-slate-500 whitespace-nowrap">
+                          <div className="text-[10px] font-mono text-slate-400 whitespace-nowrap">
                             {record.profiles?.member_code}
                           </div>
                         </td>
-                        <td className="py-3 px-3 font-mono text-slate-300 whitespace-nowrap">
+                        <td className="py-3 px-3 font-mono font-medium text-slate-600 whitespace-nowrap">
                           {formatTime(record.punch_time)}
                         </td>
                         <td className="py-3 px-3 whitespace-nowrap">
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${
                               isIn
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                                : "bg-amber-500/10 text-amber-400 border border-amber-500/30"
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : "bg-amber-50 text-amber-700 border border-amber-200"
                             }`}
                           >
                             {record.punch_type}
                           </span>
                         </td>
-                        <td className="py-3 px-3 text-slate-400 whitespace-nowrap">
-                          <span className="inline-flex items-center gap-1 text-[11px] whitespace-nowrap">
+                        <td className="py-3 px-3 text-slate-600 whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1 text-[11px] whitespace-nowrap font-medium">
                             {record.method === "mobile_biometric" ? (
                               <>
-                                <Smartphone className="w-3 h-3 text-emerald-400 shrink-0" />
-                                <span className="whitespace-nowrap">Mobile Biometric</span>
+                                <Smartphone className="w-3 h-3 text-emerald-600 shrink-0" />
+                                <span className="whitespace-nowrap text-emerald-800">Mobile Biometric</span>
                               </>
                             ) : (
                               <>
-                                <Cpu className="w-3 h-3 text-cyan-400 shrink-0" />
-                                <span className="whitespace-nowrap">{record.method}</span>
+                                <Cpu className="w-3 h-3 text-cyan-600 shrink-0" />
+                                <span className="whitespace-nowrap text-cyan-800">{record.method}</span>
                               </>
                             )}
                           </span>
@@ -243,8 +251,8 @@ export default function AdminDashboardClient({
 
             {/* PAGINATION CONTROLS BAR */}
             {totalPages > 1 && (
-              <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs pt-3">
-                <div className="flex items-center gap-2 text-slate-400">
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs pt-3">
+                <div className="flex items-center gap-2 text-slate-500">
                   <span>Show</span>
                   <select
                     value={pageSize}
@@ -252,7 +260,7 @@ export default function AdminDashboardClient({
                       setPageSize(Number(e.target.value));
                       setCurrentPage(1);
                     }}
-                    className="bg-slate-900 border border-slate-800 text-slate-200 rounded-lg px-2 py-0.5 text-xs focus:outline-none focus:border-emerald-500"
+                    className="bg-white border border-slate-200 text-slate-800 rounded-lg px-2 py-0.5 text-xs focus:outline-none focus:border-emerald-600"
                   >
                     <option value={5}>5</option>
                     <option value={10}>10</option>
@@ -263,16 +271,16 @@ export default function AdminDashboardClient({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-400 font-mono text-[11px]">
-                    Page <strong className="text-white">{safePage}</strong> of{" "}
-                    <strong className="text-white">{totalPages}</strong>
+                  <span className="text-slate-500 font-mono text-[11px]">
+                    Page <strong className="text-slate-900">{safePage}</strong> of{" "}
+                    <strong className="text-slate-900">{totalPages}</strong>
                   </span>
 
                   <div className="flex items-center gap-1 ml-2">
                     <button
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={safePage <= 1}
-                      className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                       aria-label="Previous Page"
                     >
                       <ChevronLeft className="w-3.5 h-3.5" />
@@ -281,7 +289,7 @@ export default function AdminDashboardClient({
                     <button
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                       disabled={safePage >= totalPages}
-                      className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                       aria-label="Next Page"
                     >
                       <ChevronRight className="w-3.5 h-3.5" />

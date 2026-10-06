@@ -8,7 +8,6 @@ import {
   AlertCircle,
   Loader2,
   Smartphone,
-  ShieldCheck,
   RefreshCw,
   AlertTriangle,
   Lock,
@@ -78,7 +77,7 @@ export default function BiometricRegister({
       }
 
       // 2. Prompt device biometric
-      setStatusMessage("Touch fingerprint or verify Face ID on this phone...");
+      setStatusMessage("Verify Face ID or touch fingerprint on this phone...");
       let attestationResponse;
       try {
         attestationResponse = await startRegistration({
@@ -95,7 +94,7 @@ export default function BiometricRegister({
           throw new Error("Biometric authentication cancelled.");
         }
         if (err.name === "NotSupportedError") {
-          throw new Error("OnePlus / Android Security Notice: Please make sure 'Screen lock' (PIN/Password) and Fingerprint are active in OnePlus Settings. If using private/incognito mode, open in normal Chrome tab.");
+          throw new Error("Security Notice: Please ensure Screen lock / PIN is set up on your phone. If in private/incognito mode, open in normal tab.");
         }
         throw new Error(err.message || "Biometric registration was declined or failed.");
       }
@@ -113,26 +112,29 @@ export default function BiometricRegister({
         throw new Error(verifyData.error || "Biometric verification failed.");
       }
 
-      setSuccessMessage("Biometric registered successfully ✅ This phone is now linked!");
-      setStatusMessage(null);
+      // 4. Success!
+      setSuccessMessage(
+        "Phone Biometric linked successfully! You can now use Face ID or Fingerprint."
+      );
       setCredentialCount((prev) => prev + 1);
+      setStatusMessage(null);
 
       if (onRegistered) {
         onRegistered();
       }
     } catch (err: unknown) {
       const error = err as Error;
-      setErrorMessage(error.message || "Failed to register biometric.");
+      setErrorMessage(error.message || "Biometric registration failed. Please try again.");
       setStatusMessage(null);
     } finally {
       setLoading(false);
     }
   };
 
-  // Test Registered Biometric (WebAuthn get assertion)
+  // Quick Test Biometric Authentication
   const handleTestBiometric = async () => {
     setTesting(true);
-    setStatusMessage("Testing biometric authentication...");
+    setStatusMessage("Initializing biometric sensor test...");
     setErrorMessage(null);
     setSuccessMessage(null);
 
@@ -144,15 +146,15 @@ export default function BiometricRegister({
 
       const optionsData = await optionsRes.json();
       if (!optionsRes.ok) {
-        throw new Error(optionsData.error || "Unable to test biometric.");
+        throw new Error(optionsData.error || "Failed to fetch authentication options.");
       }
 
-      setStatusMessage("Touch fingerprint sensor on phone...");
+      setStatusMessage("Verify Face ID or fingerprint now...");
       const authResponse = await startAuthentication({
         optionsJSON: optionsData,
       });
 
-      setStatusMessage("Verifying signature...");
+      setStatusMessage("Verifying signature with server...");
       const verifyRes = await fetch("/api/webauthn/authentication/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -161,10 +163,10 @@ export default function BiometricRegister({
 
       const verifyData = await verifyRes.json();
       if (!verifyRes.ok) {
-        throw new Error(verifyData.error || "Biometric test failed.");
+        throw new Error(verifyData.error || "Sensor verification failed.");
       }
 
-      setSuccessMessage("Biometric test passed! Phone sensor is verified ✅");
+      setSuccessMessage("Sensor test PASSED! Biometric verified in 0.4s.");
       setStatusMessage(null);
     } catch (err: unknown) {
       const error = err as Error;
@@ -180,14 +182,14 @@ export default function BiometricRegister({
   };
 
   return (
-    <div className="w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
+    <div className="w-full bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-5">
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+        <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
           <Smartphone className="w-6 h-6" />
         </div>
         <div>
-          <h2 className="text-base font-bold text-slate-100">Mobile Phone Biometric Setup</h2>
-          <p className="text-xs text-slate-400">
+          <h2 className="text-base font-bold text-slate-900">Mobile Phone Biometric Setup</h2>
+          <p className="text-xs text-slate-500">
             {credentialCount > 0
               ? `${credentialCount} device(s) linked with Passkey`
               : "No biometric devices linked yet"}
@@ -197,21 +199,21 @@ export default function BiometricRegister({
 
       {/* Live Phone Sensor Diagnostics Card */}
       {deviceCheck.checked && (
-        <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
-          <div className="font-semibold text-slate-300 flex items-center justify-between">
+        <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+          <div className="font-semibold text-slate-700 flex items-center justify-between">
             <span>Hardware Diagnostics:</span>
             {!deviceCheck.isSecure ? (
-              <span className="text-rose-400 font-bold flex items-center gap-1">
+              <span className="text-rose-600 font-bold flex items-center gap-1">
                 <AlertTriangle className="w-3.5 h-3.5" />
                 <span>Insecure HTTP (No HTTPS)</span>
               </span>
             ) : deviceCheck.hasBiometric ? (
-              <span className="text-emerald-400 font-bold flex items-center gap-1">
+              <span className="text-emerald-600 font-bold flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>Sensor Ready</span>
               </span>
             ) : (
-              <span className="text-amber-400 font-bold flex items-center gap-1">
+              <span className="text-amber-600 font-bold flex items-center gap-1">
                 <Lock className="w-3.5 h-3.5" />
                 <span>Screen PIN/Bio Available</span>
               </span>
@@ -219,9 +221,9 @@ export default function BiometricRegister({
           </div>
 
           {!deviceCheck.isSecure && (
-            <div className="p-2.5 rounded-xl bg-rose-950/60 border border-rose-500/30 text-[11px] text-rose-300">
+            <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-[11px] text-rose-700">
               ⚠️ Mobile browsers (Chrome / Safari) disable biometric sensors on plain HTTP.
-              Please open this app over <strong>HTTPS</strong> (e.g. using localtunnel or ngrok tunnel).
+              Please open this app over <strong>HTTPS</strong>.
             </div>
           )}
         </div>
@@ -232,10 +234,10 @@ export default function BiometricRegister({
         {credentialCount > 0 && (
           <a
             href="/member"
-            className="w-full py-4 px-6 rounded-2xl font-black text-base flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-lg shadow-emerald-950/60 active:scale-[0.98] transition-all border border-emerald-400/30 text-center"
+            className="w-full py-4 px-6 rounded-2xl font-black text-base flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 active:scale-[0.98] transition-all text-center"
           >
-            <Fingerprint className="w-6 h-6 animate-pulse" />
-            <span>🔐 GO TO PUNCH IN / OUT</span>
+            <Fingerprint className="w-6 h-6" />
+            <span>GO TO PUNCH IN / OUT</span>
           </a>
         )}
 
@@ -244,8 +246,8 @@ export default function BiometricRegister({
           disabled={loading || testing}
           className={`w-full py-3.5 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed border ${
             credentialCount > 0
-              ? "bg-slate-800/90 hover:bg-slate-700 text-slate-200 border-slate-700"
-              : "bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-lg shadow-emerald-950/60 border-emerald-400/30"
+              ? "bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200"
+              : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 border-emerald-600"
           }`}
         >
           {loading ? (
@@ -258,7 +260,7 @@ export default function BiometricRegister({
               <Fingerprint className="w-5 h-5" />
               <span>
                 {credentialCount > 0
-                  ? "RE-LINK / ADD NEW FINGERPRINT"
+                  ? "RE-LINK / ADD NEW DEVICE BIOMETRIC"
                   : "LINK THIS PHONE BIOMETRIC"}
               </span>
             </>
@@ -269,7 +271,7 @@ export default function BiometricRegister({
           <button
             onClick={handleTestBiometric}
             disabled={loading || testing}
-            className="w-full py-2.5 px-4 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 bg-slate-800/60 hover:bg-slate-700 text-emerald-300 border border-slate-700/80 active:scale-[0.98] transition-all disabled:opacity-60"
+            className="w-full py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 active:scale-[0.98] transition-all disabled:opacity-60"
           >
             {testing ? (
               <>
@@ -287,35 +289,35 @@ export default function BiometricRegister({
       </div>
 
       {/* Face ID & Fingerprint Biometric Tip */}
-      <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-emerald-500/20 text-[11px] text-slate-300 space-y-1.5">
-        <div className="font-bold text-emerald-400 flex items-center gap-1.5">
-          <Smartphone className="w-3.5 h-3.5" />
+      <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-[11px] text-slate-700 space-y-1.5">
+        <div className="font-bold text-emerald-800 flex items-center gap-1.5">
+          <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
           <span>iPhone Face ID &amp; Android Biometric Support:</span>
         </div>
-        <p className="text-slate-400 leading-relaxed">
+        <p className="text-slate-600 leading-relaxed">
           • <strong>iPhone:</strong> Button dabate hi Apple ka <strong>Face ID</strong> scanner open hoga aur chehra scan karke attendance punch karega.<br />
-          • <strong>Android:</strong> Phone ke Settings me jo bhi active hai (<strong>Face Unlock</strong> ya <strong>Fingerprint</strong>), wahi screen par popup aayega aur instantly verify karega!
+          • <strong>Android:</strong> Phone ke Settings me jo bhi active hai (<strong>Face Unlock</strong> ya <strong>Fingerprint</strong>), wahi screen par verify karega!
         </p>
       </div>
 
       {/* Status Messages */}
       {statusMessage && (
-        <div className="mt-3 p-3 rounded-xl bg-slate-950 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2.5">
-          <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-          <span>{statusMessage}</span>
+        <div className="mt-3 p-3 rounded-xl bg-slate-50 border border-emerald-300 text-emerald-800 text-xs flex items-center gap-2.5">
+          <Loader2 className="w-4 h-4 animate-spin shrink-0 text-emerald-600" />
+          <span className="font-semibold">{statusMessage}</span>
         </div>
       )}
 
       {successMessage && (
-        <div className="mt-3 p-3.5 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2.5 font-bold">
-          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+        <div className="mt-3 p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs flex items-center gap-2.5 font-bold">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
           <span>{successMessage}</span>
         </div>
       )}
 
       {errorMessage && (
-        <div className="mt-3 p-3.5 rounded-xl bg-rose-950/80 border border-rose-500/40 text-rose-300 text-xs flex items-start gap-2.5">
-          <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+        <div className="mt-3 p-3.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-xs flex items-start gap-2.5">
+          <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
           <span className="font-semibold">{errorMessage}</span>
         </div>
       )}

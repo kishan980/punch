@@ -42,7 +42,7 @@ export default async function MemberAttendancePage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar
         userRole={profile?.role || "member"}
         memberName={profile?.full_name || "Gym Member"}
@@ -53,29 +53,29 @@ export default async function MemberAttendancePage() {
         <div className="flex items-center justify-between">
           <Link
             href="/member"
-            className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 font-semibold transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Dashboard</span>
           </Link>
-          <span className="text-xs font-mono text-emerald-400">
+          <span className="text-xs font-mono font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
             {profile?.member_code || "GYM-0001"}
           </span>
         </div>
 
         <div className="space-y-1">
-          <h1 className="text-xl font-black text-white uppercase tracking-tight">
+          <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">
             Attendance Log
           </h1>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500 font-medium">
             Complete record of your gym visits and mobile biometric punches.
           </p>
         </div>
 
         {/* Today's Section */}
         <div className="space-y-3">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-            <Calendar className="w-3.5 h-3.5 text-emerald-400" />
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+            <Calendar className="w-3.5 h-3.5 text-emerald-600" />
             <span>Today&apos;s Attendance</span>
           </h2>
           <AttendanceList records={todayRecords} todayOnly={true} />
@@ -83,8 +83,8 @@ export default async function MemberAttendancePage() {
 
         {/* Previous Days Section */}
         {pastRecords.length > 0 && (
-          <div className="space-y-3 pt-4 border-t border-slate-800/80">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          <div className="space-y-3 pt-4 border-t border-slate-200">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
               Previous Visits
             </h2>
             <AttendanceList records={pastRecords} todayOnly={false} />

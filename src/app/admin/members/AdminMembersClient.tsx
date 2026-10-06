@@ -11,8 +11,6 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Users,
-  Smartphone,
 } from "lucide-react";
 import type { Profile } from "@/types/attendance";
 
@@ -107,31 +105,31 @@ export default function AdminMembersClient({
       <div className="flex items-center justify-between">
         <Link
           href="/admin"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 font-semibold transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Dashboard</span>
         </Link>
-        <span className="text-xs text-slate-400 font-mono">
+        <span className="text-xs text-slate-500 font-mono font-bold bg-white px-2.5 py-1 rounded-lg border border-slate-200">
           {members.length} Total Members
         </span>
       </div>
 
       <div>
-        <h1 className="text-xl font-black text-white uppercase tracking-tight">
+        <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">
           Member Management &amp; Today&apos;s Punches
         </h1>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-slate-500 font-medium">
           User-wise biometric passkey status and live IN / OUT timestamps.
         </p>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3 shadow-xl">
+      <div className="bg-white border border-slate-200/80 rounded-3xl p-5 space-y-3 shadow-xs">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Member Search */}
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
             <input
               type="text"
               placeholder="Search by name, ID or phone..."
@@ -140,7 +138,7 @@ export default function AdminMembersClient({
                 setSearch(e.target.value);
                 handleFilterChange();
               }}
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all"
             />
           </div>
 
@@ -152,7 +150,7 @@ export default function AdminMembersClient({
                 setStatusFilter(e.target.value);
                 handleFilterChange();
               }}
-              className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+              className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 font-medium focus:outline-none focus:bg-white focus:border-emerald-600 transition-all"
             >
               <option value="all">All Membership Status</option>
               <option value="active">Active Members</option>
@@ -168,7 +166,7 @@ export default function AdminMembersClient({
                 setBiometricFilter(e.target.value);
                 handleFilterChange();
               }}
-              className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+              className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 font-medium focus:outline-none focus:bg-white focus:border-emerald-600 transition-all"
             >
               <option value="all">All Biometric Status</option>
               <option value="registered">Registered Biometric ✅</option>
@@ -178,10 +176,10 @@ export default function AdminMembersClient({
         </div>
 
         {/* Filter Stats */}
-        <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800/80">
+        <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
           <span>
-            Showing <strong className="text-white">{filteredMembers.length}</strong> of{" "}
-            <strong className="text-white">{members.length}</strong> members
+            Showing <strong className="text-slate-900">{filteredMembers.length}</strong> of{" "}
+            <strong className="text-slate-900">{members.length}</strong> members
           </span>
           {(search || statusFilter !== "all" || biometricFilter !== "all") && (
             <button
@@ -191,7 +189,7 @@ export default function AdminMembersClient({
                 setBiometricFilter("all");
                 setCurrentPage(1);
               }}
-              className="text-xs text-emerald-400 hover:underline font-semibold"
+              className="text-xs text-emerald-600 hover:underline font-bold"
             >
               Reset Filters
             </button>
@@ -200,11 +198,11 @@ export default function AdminMembersClient({
       </div>
 
       {/* Member List Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
+      <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs space-y-4">
         <div className="overflow-x-auto scrollbar-thin">
           <table className="min-w-full text-left text-xs whitespace-nowrap">
             <thead>
-              <tr className="border-b border-slate-800/80 text-slate-400 uppercase tracking-wider text-[10px]">
+              <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[10px]">
                 <th className="py-3 px-3 font-bold whitespace-nowrap">Member ID</th>
                 <th className="py-3 px-3 font-bold whitespace-nowrap">Name</th>
                 <th className="py-3 px-3 font-bold whitespace-nowrap">Phone</th>
@@ -213,10 +211,10 @@ export default function AdminMembersClient({
                 <th className="py-3 px-3 font-bold whitespace-nowrap">Today&apos;s Punch IN / OUT</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/50">
+            <tbody className="divide-y divide-slate-100">
               {paginatedMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-xs text-slate-500">
+                  <td colSpan={6} className="text-center py-8 text-xs text-slate-400">
                     No members match your search criteria.
                   </td>
                 </tr>
@@ -229,23 +227,23 @@ export default function AdminMembersClient({
                   return (
                     <tr
                       key={member.id}
-                      className="hover:bg-slate-800/30 transition-colors"
+                      className="hover:bg-slate-50 transition-colors"
                     >
-                      <td className="py-3.5 px-3 font-mono font-bold text-emerald-400 whitespace-nowrap">
+                      <td className="py-3.5 px-3 font-mono font-bold text-emerald-700 whitespace-nowrap">
                         {member.member_code}
                       </td>
-                      <td className="py-3.5 px-3 font-semibold text-slate-200 whitespace-nowrap">
+                      <td className="py-3.5 px-3 font-bold text-slate-800 whitespace-nowrap">
                         {member.full_name}
                       </td>
-                      <td className="py-3.5 px-3 font-mono text-slate-400 whitespace-nowrap">
+                      <td className="py-3.5 px-3 font-mono text-slate-500 whitespace-nowrap">
                         {member.phone || "—"}
                       </td>
                       <td className="py-3.5 px-3 whitespace-nowrap">
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${
                             member.status === "active"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                              : "bg-rose-50 text-rose-700 border border-rose-200"
                           }`}
                         >
                           {member.status}
@@ -253,13 +251,13 @@ export default function AdminMembersClient({
                       </td>
                       <td className="py-3.5 px-3 whitespace-nowrap">
                         {isRegistered ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-medium whitespace-nowrap">
-                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-bold whitespace-nowrap">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                             <span>Registered ✅</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 font-medium whitespace-nowrap">
-                            <XCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span className="inline-flex items-center gap-1 text-[11px] text-slate-400 font-medium whitespace-nowrap">
+                            <XCircle className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                             <span>Not Registered</span>
                           </span>
                         )}
@@ -267,24 +265,24 @@ export default function AdminMembersClient({
                       <td className="py-3.5 px-3 whitespace-nowrap">
                         {punchData?.firstInTime ? (
                           <div className="flex items-center gap-2 whitespace-nowrap">
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20 font-mono whitespace-nowrap">
-                              <LogIn className="w-2.5 h-2.5 shrink-0" />
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 font-mono whitespace-nowrap">
+                              <LogIn className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
                               <span>IN: {formatTime(punchData.firstInTime)}</span>
                             </span>
 
                             {punchData.lastOutTime ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20 font-mono whitespace-nowrap">
-                                <LogOut className="w-2.5 h-2.5 shrink-0" />
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 font-mono whitespace-nowrap">
+                                <LogOut className="w-2.5 h-2.5 text-amber-600 shrink-0" />
                                 <span>OUT: {formatTime(punchData.lastOutTime)}</span>
                               </span>
                             ) : isInside ? (
-                              <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30 whitespace-nowrap">
+                              <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded-full border border-emerald-300 whitespace-nowrap">
                                 INSIDE GYM
                               </span>
                             ) : null}
                           </div>
                         ) : (
-                          <span className="text-slate-500 text-[11px] whitespace-nowrap">
+                          <span className="text-slate-400 text-[11px] whitespace-nowrap">
                             No punches today
                           </span>
                         )}
@@ -298,9 +296,9 @@ export default function AdminMembersClient({
         </div>
 
         {/* PAGINATION CONTROLS BAR */}
-        <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           {/* Per Page Selector */}
-          <div className="flex items-center gap-2 text-slate-400">
+          <div className="flex items-center gap-2 text-slate-500">
             <span>Show</span>
             <select
               value={pageSize}
@@ -308,7 +306,7 @@ export default function AdminMembersClient({
                 setPageSize(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="bg-slate-900 border border-slate-800 text-slate-200 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-emerald-500"
+              className="bg-white border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-emerald-600"
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -320,10 +318,10 @@ export default function AdminMembersClient({
 
           {/* Page Indicator & Navigation */}
           <div className="flex items-center gap-2">
-            <span className="text-slate-400 font-mono">
-              Page <strong className="text-white">{safePage}</strong> of{" "}
-              <strong className="text-white">{totalPages}</strong>
-              <span className="ml-1 text-slate-500">
+            <span className="text-slate-500 font-mono">
+              Page <strong className="text-slate-900">{safePage}</strong> of{" "}
+              <strong className="text-slate-900">{totalPages}</strong>
+              <span className="ml-1 text-slate-400">
                 ({totalItems} {totalItems === 1 ? "member" : "members"})
               </span>
             </span>
@@ -332,7 +330,7 @@ export default function AdminMembersClient({
               <button
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={safePage <= 1}
-                className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Previous Page"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -341,7 +339,7 @@ export default function AdminMembersClient({
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={safePage >= totalPages}
-                className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Next Page"
               >
                 <ChevronRight className="w-4 h-4" />
