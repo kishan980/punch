@@ -286,14 +286,15 @@ export default function BiometricRegister({
         )}
       </div>
 
-      {/* Side-mounted Fingerprint Sensor Tip */}
+      {/* Face ID & Fingerprint Biometric Tip */}
       <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-emerald-500/20 text-[11px] text-slate-300 space-y-1.5">
         <div className="font-bold text-emerald-400 flex items-center gap-1.5">
           <Smartphone className="w-3.5 h-3.5" />
-          <span>Side Fingerprint Scanner Tip:</span>
+          <span>iPhone Face ID &amp; Android Biometric Support:</span>
         </div>
         <p className="text-slate-400 leading-relaxed">
-          Agar biometric scan karte waqt phone aage ka Face camera scan karne lage, toh camera ki taraf mat dekhein — <strong>seedhe apne phone ke side wale power button / fingerprint sensor par ungli lagayein</strong>. Android side fingerprint turant scan kar lega!
+          • <strong>iPhone:</strong> Button dabate hi Apple ka <strong>Face ID</strong> scanner open hoga aur chehra scan karke attendance punch karega.<br />
+          • <strong>Android:</strong> Phone ke Settings me jo bhi active hai (<strong>Face Unlock</strong> ya <strong>Fingerprint</strong>), wahi screen par popup aayega aur instantly verify karega!
         </p>
       </div>
 

@@ -48,11 +48,11 @@ export async function POST(request: Request) {
       userDisplayName: profile?.full_name || "Gym Member",
       attestationType: "none",
       excludeCredentials: [], // Allows re-registration and multiple biometric enrollments
-      supportedAlgorithmIDs: [-7, -257], // ES256 & RS256 - required for Android/OnePlus hardware keystore
+      supportedAlgorithmIDs: [-7, -257], // ES256 & RS256 - required for Android/OnePlus hardware keystore & Apple Secure Enclave
       authenticatorSelection: {
-        authenticatorAttachment: "platform",
+        authenticatorAttachment: "platform", // Native device sensor (Face ID / Face Unlock / Fingerprint)
         residentKey: "preferred",
-        userVerification: "required", // OnePlus OxygenOS requires userVerification to be required/preferred
+        userVerification: "preferred", // 'preferred' allows iPhone Face ID, Android Face Unlock & Fingerprint without strict blocking
       },
     });
 
