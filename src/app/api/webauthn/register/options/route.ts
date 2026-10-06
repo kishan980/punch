@@ -1,0 +1,66 @@
+import { NextResponse } from "next/server";
+import { generateRegistrationOptions } from "@simplewebauthn/server";
+import { createClient } from "@/lib/supabase/server";
+import { getWebAuthnConfig } from "@/lib/webauthn/config";
+import { setRegistrationChallenge } from "@/lib/webauthn/helpers";
+
+export async function POST(request: Request) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get user's profile
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, member_code")
+      .eq("auth_user_id", user.id)
+      .single();
+
+    const origin = request.headers.get("origin") || undefined;
+    const host = request.headers.get("host") || undefined;
+    const { rpId, rpName } = getWebAuthnConfig(origin, host);
+
+    // Fetch existing credentials to exclude already registered authenticators
+    const { data: existingCredentials } = await supabase
+      .from("webauthn_credentials")
+      .select("credential_id")
+      .eq("user_id", user.id);
+
+    const excludeCredentials = (existingCredentials || []).map((cred) => ({
+      id: cred.credential_id,
+      transports: ["internal" as const],
+    }));
+
+    // Generate registration options specifically tailored for platform mobile biometrics
+    const options = await generateRegistrationOptions({
+      rpName,
+      rpID: rpId,
+      userID: new TextEncoder().encode(user.id),
+      userName: user.email || profile?.member_code || "Gym Member",
+      userDisplayName: profile?.full_name || "Gym Member",
+      attestationType: "none",
+      excludeCredentials,
+      authenticatorSelection: {
+        authenticatorAttachment: "platform", // Enforces platform biometric (Fingerprint / Face ID / PIN)
+        residentKey: "preferred",
+        userVerification: "preferred", // Compatible with all Android & iOS devices
+      },
+    });
+
+    // Store challenge in httpOnly cookie
+    await setRegistrationChallenge(options.challenge);
+
+    return NextResponse.json(options);
+  } catch (error: unknown) {
+    console.error("Error generating registration options:", error);
+    const msg = error instanceof Error ? error.message : "Internal Server Error";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
