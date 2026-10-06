@@ -500,7 +500,7 @@ export default function AdminAttendanceExplorer({
           )}
         </div>
       ) : (
-        {/* ALL RAW LOGS STREAM VIEW */}
+        /* ALL RAW LOGS STREAM VIEW */
         <div className="bg-white border-2 border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between pb-2 border-b-2 border-slate-100">
             <h2 className="text-base font-black uppercase tracking-wider text-black flex items-center gap-2">
