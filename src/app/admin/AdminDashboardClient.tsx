@@ -171,14 +171,14 @@ export default function AdminDashboardClient({
             No punches recorded today yet.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="min-w-full text-left text-xs whitespace-nowrap">
               <thead>
                 <tr className="border-b border-slate-800/80 text-slate-400 uppercase tracking-wider text-[10px]">
-                  <th className="pb-2.5 font-bold">Member</th>
-                  <th className="pb-2.5 font-bold">Time</th>
-                  <th className="pb-2.5 font-bold">Type</th>
-                  <th className="pb-2.5 font-bold">Method</th>
+                  <th className="py-2.5 px-3 font-bold whitespace-nowrap">Member</th>
+                  <th className="py-2.5 px-3 font-bold whitespace-nowrap">Time</th>
+                  <th className="py-2.5 px-3 font-bold whitespace-nowrap">Type</th>
+                  <th className="py-2.5 px-3 font-bold whitespace-nowrap">Method</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50">
@@ -189,18 +189,18 @@ export default function AdminDashboardClient({
                       key={record.id}
                       className="hover:bg-slate-800/30 transition-colors animate-fadeIn"
                     >
-                      <td className="py-3 font-semibold text-slate-200">
-                        <div>{record.profiles?.full_name || "Unknown Member"}</div>
-                        <div className="text-[10px] font-mono text-slate-500">
+                      <td className="py-3 px-3 font-semibold text-slate-200 whitespace-nowrap">
+                        <div className="whitespace-nowrap">{record.profiles?.full_name || "Unknown Member"}</div>
+                        <div className="text-[10px] font-mono text-slate-500 whitespace-nowrap">
                           {record.profiles?.member_code}
                         </div>
                       </td>
-                      <td className="py-3 font-mono text-slate-300">
+                      <td className="py-3 px-3 font-mono text-slate-300 whitespace-nowrap">
                         {formatTime(record.punch_time)}
                       </td>
-                      <td className="py-3">
+                      <td className="py-3 px-3 whitespace-nowrap">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${
                             isIn
                               ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
                               : "bg-amber-500/10 text-amber-400 border border-amber-500/30"
@@ -209,17 +209,17 @@ export default function AdminDashboardClient({
                           {record.punch_type}
                         </span>
                       </td>
-                      <td className="py-3 text-slate-400">
-                        <span className="inline-flex items-center gap-1 text-[11px]">
+                      <td className="py-3 px-3 text-slate-400 whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1 text-[11px] whitespace-nowrap">
                           {record.method === "mobile_biometric" ? (
                             <>
-                              <Smartphone className="w-3 h-3 text-emerald-400" />
-                              <span>Mobile Biometric</span>
+                              <Smartphone className="w-3 h-3 text-emerald-400 shrink-0" />
+                              <span className="whitespace-nowrap">Mobile Biometric</span>
                             </>
                           ) : (
                             <>
-                              <Cpu className="w-3 h-3 text-cyan-400" />
-                              <span>{record.method}</span>
+                              <Cpu className="w-3 h-3 text-cyan-400 shrink-0" />
+                              <span className="whitespace-nowrap">{record.method}</span>
                             </>
                           )}
                         </span>

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, XCircle, Search } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle, LogIn, LogOut, Clock } from "lucide-react";
 
 export default async function AdminMembersPage() {
   const supabase = await createClient();
@@ -37,7 +37,7 @@ export default async function AdminMembersPage() {
 
   const registeredUserIds = new Set(credentials?.map((c) => c.user_id) || []);
 
-  // 3. Fetch today's punches to see today's status
+  // 3. Fetch today's punches to see today's user-wise IN & OUT times
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
 
@@ -47,10 +47,46 @@ export default async function AdminMembersPage() {
     .gte("punch_time", startOfDay)
     .order("punch_time", { ascending: true });
 
-  const userTodayPunchMap: Record<string, string> = {};
+  // Compute User-Wise Punch IN and OUT details
+  const userPunchMap: Record<
+    string,
+    {
+      firstInTime: string | null;
+      lastOutTime: string | null;
+      latestType: string | null;
+    }
+  > = {};
+
   todayPunches?.forEach((p) => {
-    userTodayPunchMap[p.user_id] = p.punch_type;
+    if (!userPunchMap[p.user_id]) {
+      userPunchMap[p.user_id] = {
+        firstInTime: null,
+        lastOutTime: null,
+        latestType: null,
+      };
+    }
+
+    if (p.punch_type === "in" && !userPunchMap[p.user_id].firstInTime) {
+      userPunchMap[p.user_id].firstInTime = p.punch_time;
+    }
+    if (p.punch_type === "out") {
+      userPunchMap[p.user_id].lastOutTime = p.punch_time;
+    }
+    userPunchMap[p.user_id].latestType = p.punch_type;
   });
+
+  const formatTime = (isoString?: string | null) => {
+    if (!isoString) return "";
+    try {
+      return new Date(isoString).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
+    } catch {
+      return isoString;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col">
@@ -60,7 +96,7 @@ export default async function AdminMembersPage() {
         memberCode={adminProfile.member_code}
       />
 
-      <main className="max-w-3xl mx-auto w-full px-4 py-6 flex-1 space-y-6">
+      <main className="max-w-4xl mx-auto w-full px-4 py-6 flex-1 space-y-6">
         <div className="flex items-center justify-between">
           <Link
             href="/admin"
@@ -76,49 +112,50 @@ export default async function AdminMembersPage() {
 
         <div>
           <h1 className="text-xl font-black text-white uppercase tracking-tight">
-            Member Management
+            Member Management &amp; Today&apos;s Punches
           </h1>
           <p className="text-xs text-slate-400">
-            View member profiles, biometric passkey status, and live attendance state.
+            User-wise biometric passkey status and live IN / OUT timestamps.
           </p>
         </div>
 
-        {/* Member List Table */}
+        {/* Member List Table with User-Wise In & Out */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="min-w-full text-left text-xs whitespace-nowrap">
               <thead>
                 <tr className="border-b border-slate-800/80 text-slate-400 uppercase tracking-wider text-[10px]">
-                  <th className="pb-3 font-bold">Member ID</th>
-                  <th className="pb-3 font-bold">Name</th>
-                  <th className="pb-3 font-bold">Phone</th>
-                  <th className="pb-3 font-bold">Status</th>
-                  <th className="pb-3 font-bold">Biometric</th>
-                  <th className="pb-3 font-bold">Today&apos;s Punch</th>
+                  <th className="py-3 px-3 font-bold whitespace-nowrap">Member ID</th>
+                  <th className="py-3 px-3 font-bold whitespace-nowrap">Name</th>
+                  <th className="py-3 px-3 font-bold whitespace-nowrap">Phone</th>
+                  <th className="py-3 px-3 font-bold whitespace-nowrap">Status</th>
+                  <th className="py-3 px-3 font-bold whitespace-nowrap">Biometric</th>
+                  <th className="py-3 px-3 font-bold whitespace-nowrap">Today&apos;s Punch IN / OUT</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50">
                 {members?.map((member) => {
                   const isRegistered = registeredUserIds.has(member.auth_user_id);
-                  const todayPunch = userTodayPunchMap[member.auth_user_id];
+                  const punchData = userPunchMap[member.auth_user_id];
+                  const isInside = punchData?.latestType === "in";
 
                   return (
                     <tr
                       key={member.id}
                       className="hover:bg-slate-800/30 transition-colors"
                     >
-                      <td className="py-3.5 font-mono font-bold text-emerald-400">
+                      <td className="py-3.5 px-3 font-mono font-bold text-emerald-400 whitespace-nowrap">
                         {member.member_code}
                       </td>
-                      <td className="py-3.5 font-semibold text-slate-200">
+                      <td className="py-3.5 px-3 font-semibold text-slate-200 whitespace-nowrap">
                         {member.full_name}
                       </td>
-                      <td className="py-3.5 font-mono text-slate-400">
+                      <td className="py-3.5 px-3 font-mono text-slate-400 whitespace-nowrap">
                         {member.phone || "—"}
                       </td>
-                      <td className="py-3.5">
+                      <td className="py-3.5 px-3 whitespace-nowrap">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${
                             member.status === "active"
                               ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                               : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
@@ -127,30 +164,40 @@ export default async function AdminMembersPage() {
                           {member.status}
                         </span>
                       </td>
-                      <td className="py-3.5">
+                      <td className="py-3.5 px-3 whitespace-nowrap">
                         {isRegistered ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-medium">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-medium whitespace-nowrap">
+                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                             <span>Registered ✅</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 font-medium">
-                            <XCircle className="w-3.5 h-3.5" />
+                          <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 font-medium whitespace-nowrap">
+                            <XCircle className="w-3.5 h-3.5 shrink-0" />
                             <span>Not Registered</span>
                           </span>
                         )}
                       </td>
-                      <td className="py-3.5">
-                        {todayPunch === "in" ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                            Punched In
-                          </span>
-                        ) : todayPunch === "out" ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
-                            Punched Out
-                          </span>
+                      <td className="py-3.5 px-3 whitespace-nowrap">
+                        {punchData?.firstInTime ? (
+                          <div className="flex items-center gap-2 whitespace-nowrap">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20 font-mono whitespace-nowrap">
+                              <LogIn className="w-2.5 h-2.5 shrink-0" />
+                              <span>IN: {formatTime(punchData.firstInTime)}</span>
+                            </span>
+
+                            {punchData.lastOutTime ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20 font-mono whitespace-nowrap">
+                                <LogOut className="w-2.5 h-2.5 shrink-0" />
+                                <span>OUT: {formatTime(punchData.lastOutTime)}</span>
+                              </span>
+                            ) : isInside ? (
+                              <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30 whitespace-nowrap">
+                                INSIDE GYM
+                              </span>
+                            ) : null}
+                          </div>
                         ) : (
-                          <span className="text-slate-500 text-[11px]">—</span>
+                          <span className="text-slate-500 text-[11px] whitespace-nowrap">No punches today</span>
                         )}
                       </td>
                     </tr>
