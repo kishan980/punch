@@ -23,8 +23,14 @@ export async function POST(request: Request) {
       .eq("auth_user_id", user.id)
       .single();
 
-    const origin = request.headers.get("origin") || undefined;
-    const host = request.headers.get("host") || undefined;
+    const origin =
+      request.headers.get("origin") ||
+      request.headers.get("referer") ||
+      undefined;
+    const host =
+      request.headers.get("x-forwarded-host") ||
+      request.headers.get("host") ||
+      undefined;
     const { rpId, rpName } = getWebAuthnConfig(origin, host);
 
     // Fetch existing credentials to exclude already registered authenticators

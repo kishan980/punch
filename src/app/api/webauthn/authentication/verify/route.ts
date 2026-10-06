@@ -54,8 +54,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const origin = request.headers.get("origin") || undefined;
-    const host = request.headers.get("host") || undefined;
+    const origin =
+      request.headers.get("origin") ||
+      request.headers.get("referer") ||
+      undefined;
+    const host =
+      request.headers.get("x-forwarded-host") ||
+      request.headers.get("host") ||
+      undefined;
     const { rpId, expectedOrigin } = getWebAuthnConfig(origin, host);
 
     const credentialPublicKeyBytes = base64UrlToUint8Array(credentialRecord.public_key);
