@@ -249,7 +249,7 @@ export default function AdminDashboardClient({
   const googleMapsUrl = `https://www.google.com/maps?q=${locationConfig.latitude},${locationConfig.longitude}`;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Live Activity Notification Banner */}
       {liveEventNotice && (
         <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold flex items-center gap-3 shadow-md">
@@ -259,58 +259,58 @@ export default function AdminDashboardClient({
       )}
 
       {/* Top 3 KPI Metric Cards */}
-      <div className="grid grid-cols-3 gap-3 sm:gap-4">
-        <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs">
-          <div className="flex items-center gap-2 text-slate-800 mb-1">
-            <Users className="w-4 h-4 text-emerald-700" />
-            <span className="text-xs font-black uppercase tracking-wider">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 sm:p-5 shadow-xs">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-slate-800 mb-1">
+            <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-700 shrink-0" />
+            <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider truncate">
               Members
             </span>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-black font-mono">
+          <div className="text-xl sm:text-3xl font-black text-black font-mono">
             {totalMembers}
           </div>
         </div>
 
-        <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs">
-          <div className="flex items-center gap-2 text-slate-800 mb-1">
-            <Fingerprint className="w-4 h-4 text-teal-700" />
-            <span className="text-xs font-black uppercase tracking-wider">
-              Today&apos;s Punches
+        <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 sm:p-5 shadow-xs">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-slate-800 mb-1">
+            <Fingerprint className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-700 shrink-0" />
+            <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider truncate">
+              Punches
             </span>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-black font-mono">
+          <div className="text-xl sm:text-3xl font-black text-black font-mono">
             {punches.length}
           </div>
         </div>
 
-        <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs">
-          <div className="flex items-center gap-2 text-slate-800 mb-1">
-            <Activity className="w-4 h-4 text-emerald-700" />
-            <span className="text-xs font-black uppercase tracking-wider">
-              Inside Now
+        <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 sm:p-5 shadow-xs">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-slate-800 mb-1">
+            <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-700 shrink-0" />
+            <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider truncate">
+              Inside
             </span>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-emerald-700 font-mono">
+          <div className="text-xl sm:text-3xl font-black text-emerald-700 font-mono">
             {currentlyInsideCount}
           </div>
         </div>
       </div>
 
       {/* OFFICE GPS GEOFENCING CONFIGURATION CARD */}
-      <div className="bg-white border-2 border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b-2 border-slate-100 gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-800 shrink-0">
+      <div className="bg-white border-2 border-slate-200 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-4 border-b-2 border-slate-100 gap-3">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-800 shrink-0 mt-0.5 sm:mt-0">
               <MapPin className="w-5 h-5 text-emerald-700" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-base sm:text-lg font-black uppercase tracking-tight text-black">
                   Office GPS Geofencing
                 </h2>
                 <span
-                  className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${
+                  className={`text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
                     locationConfig.isEnabled
                       ? "bg-emerald-100 text-emerald-950 border-emerald-300"
                       : "bg-slate-100 text-slate-700 border-slate-300"
@@ -319,36 +319,36 @@ export default function AdminDashboardClient({
                   {locationConfig.isEnabled ? "ENFORCED ON" : "DISABLED"}
                 </span>
               </div>
-              <p className="text-xs text-slate-600 font-semibold mt-0.5">
+              <p className="text-[11px] sm:text-xs text-slate-600 font-semibold mt-0.5 leading-snug">
                 Members can only punch attendance within this office location and allowed radius.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={handleDetectCurrentLocation}
               disabled={locDetecting}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black transition-colors shadow-xs"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 py-2.5 px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black transition-colors shadow-xs"
             >
               {locDetecting ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-white shrink-0" />
               ) : (
-                <Navigation className="w-3.5 h-3.5 text-emerald-200" />
+                <Navigation className="w-3.5 h-3.5 text-emerald-200 shrink-0" />
               )}
-              <span>{locDetecting ? "Setting GPS..." : "📍 Set My Current GPS as Office"}</span>
+              <span>{locDetecting ? "Setting GPS..." : "📍 Set My GPS as Office"}</span>
             </button>
 
             <a
               href={googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 text-slate-900 rounded-xl text-xs font-bold transition-colors"
+              className="inline-flex items-center justify-center gap-1 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 text-slate-900 rounded-xl text-xs font-bold transition-colors shrink-0"
               title="View on Google Maps"
             >
-              <span>View Map</span>
-              <ExternalLink className="w-3.5 h-3.5 text-slate-700" />
+              <span>Map</span>
+              <ExternalLink className="w-3.5 h-3.5 text-slate-700 shrink-0" />
             </a>
           </div>
         </div>
@@ -457,7 +457,7 @@ export default function AdminDashboardClient({
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
             {/* Toggle Geofencing switch */}
-            <label className="flex items-center gap-3 cursor-pointer select-none">
+            <label className="flex items-center gap-2.5 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={locationConfig.isEnabled}
@@ -467,17 +467,17 @@ export default function AdminDashboardClient({
                     isEnabled: e.target.checked,
                   }))
                 }
-                className="w-5 h-5 accent-emerald-600 rounded cursor-pointer"
+                className="w-5 h-5 accent-emerald-600 rounded cursor-pointer shrink-0"
               />
-              <span className="text-xs font-black uppercase tracking-wide text-black">
+              <span className="text-xs font-black uppercase tracking-wide text-black leading-snug">
                 {locationConfig.isEnabled ? (
-                  <span className="text-emerald-800 flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                    GPS Geofence Restriction Active (Punch blocked outside office area)
+                  <span className="text-emerald-800 flex items-center gap-1.5 flex-wrap">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>GPS Restriction Active (Punch blocked outside)</span>
                   </span>
                 ) : (
                   <span className="text-slate-600">
-                    GPS Geofence Inactive (Punch allowed from anywhere)
+                    GPS Restriction Inactive (Punch allowed anywhere)
                   </span>
                 )}
               </span>
@@ -486,12 +486,12 @@ export default function AdminDashboardClient({
             <button
               type="submit"
               disabled={locSaving}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-sm disabled:opacity-50"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-sm disabled:opacity-50"
             >
               {locSaving ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin shrink-0" />
               ) : (
-                <Save className="w-4 h-4" />
+                <Save className="w-4 h-4 shrink-0" />
               )}
               <span>{locSaving ? "Saving..." : "Save Office GPS Settings"}</span>
             </button>
@@ -500,7 +500,7 @@ export default function AdminDashboardClient({
       </div>
 
       {/* Today's Attendance Table with Live Stream */}
-      <div className="bg-white border-2 border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
+      <div className="bg-white border-2 border-slate-200 rounded-3xl p-4 sm:p-5 shadow-sm space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between pb-3 border-b-2 border-slate-100">
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-emerald-700" />

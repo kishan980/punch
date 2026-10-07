@@ -156,22 +156,22 @@ export default async function AdminDashboardPage() {
         memberCode={adminProfile.member_code}
       />
 
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
+      <main className="max-w-6xl mx-auto w-full px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <span className="text-xs font-black uppercase tracking-widest text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300">
+            <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300">
               Admin Portal
             </span>
             <h1 className="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight mt-1.5">
               GYM ADMIN
             </h1>
-            <p className="text-sm text-slate-700 font-semibold">
+            <p className="text-xs sm:text-sm text-slate-700 font-semibold mt-0.5">
               Live attendance monitoring &amp; biometric management
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="hidden sm:flex gap-2">
             <Link
               href="/admin/members"
               className="px-4 py-2 rounded-xl bg-slate-100 text-sm font-bold text-slate-900 hover:bg-slate-200 transition-colors border border-slate-300 shadow-xs"

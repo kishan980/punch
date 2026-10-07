@@ -240,20 +240,20 @@ export default function AdminAttendanceExplorer({
         </p>
       </div>
 
-      {/* View Mode Toggle: User-Wise vs All Logs */}
-      <div className="flex items-center gap-2 p-1 bg-slate-100 border-2 border-slate-200 rounded-2xl w-fit shadow-xs">
+      {/* View Mode Toggle: User-Wise vs All Logs (Stacked on mobile, side-by-side on desktop) */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-1.5 bg-slate-100 border-2 border-slate-200 rounded-2xl w-full sm:w-fit shadow-xs">
         <button
           onClick={() => {
             setViewMode("user-wise");
             setCurrentPage(1);
           }}
-          className={`px-4 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2 ${
+          className={`w-full sm:w-auto px-4 py-3 sm:py-2.5 rounded-xl text-sm font-black transition-all flex items-center justify-center sm:justify-start gap-2.5 ${
             viewMode === "user-wise"
               ? "bg-emerald-600 text-white shadow-sm"
               : "text-slate-800 hover:text-black hover:bg-slate-200"
           }`}
         >
-          <Users className="w-4 h-4" />
+          <Users className="w-4 h-4 shrink-0" />
           <span>User-Wise Punch Summary</span>
         </button>
 
@@ -262,13 +262,13 @@ export default function AdminAttendanceExplorer({
             setViewMode("logs");
             setCurrentPage(1);
           }}
-          className={`px-4 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2 ${
+          className={`w-full sm:w-auto px-4 py-3 sm:py-2.5 rounded-xl text-sm font-black transition-all flex items-center justify-center sm:justify-start gap-2.5 ${
             viewMode === "logs"
               ? "bg-emerald-600 text-white shadow-sm"
               : "text-slate-800 hover:text-black hover:bg-slate-200"
           }`}
         >
-          <Clock className="w-4 h-4" />
+          <Clock className="w-4 h-4 shrink-0" />
           <span>All Raw Logs Stream</span>
         </button>
       </div>

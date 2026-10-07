@@ -154,7 +154,7 @@ export default async function AdminMembersPage() {
         memberCode={safeAdminProfile.member_code}
       />
 
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
+      <main className="max-w-6xl mx-auto w-full px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 space-y-4 sm:space-y-6">
         <AdminMembersClient
           members={(members as Profile[]) || []}
           registeredUserIds={registeredUserIds}
