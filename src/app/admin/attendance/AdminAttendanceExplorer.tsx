@@ -389,47 +389,77 @@ export default function AdminAttendanceExplorer({
                     className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-200 hover:border-slate-300 transition-all space-y-3"
                   >
                     {/* User Summary Row */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 overflow-x-auto scrollbar-thin pb-1">
-                      <div className="flex items-center gap-3 shrink-0 whitespace-nowrap">
-                        <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-black shrink-0 border border-emerald-300">
-                          <User className="w-5 h-5" />
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                      {/* Member Info + Mobile Status Badge & Expand */}
+                      <div className="flex items-center justify-between gap-2 w-full md:w-auto">
+                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-black shrink-0 border border-emerald-300">
+                            <User className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-black text-sm sm:text-base text-black truncate">
+                              {user.fullName}
+                            </div>
+                            <div className="text-xs font-mono text-emerald-800 font-black truncate">
+                              {user.memberCode} {user.phone ? `• ${user.phone}` : ""}
+                            </div>
+                          </div>
                         </div>
-                        <div className="whitespace-nowrap">
-                          <div className="font-black text-base text-black whitespace-nowrap">
-                            {user.fullName}
-                          </div>
-                          <div className="text-xs font-mono text-emerald-800 font-black whitespace-nowrap">
-                            {user.memberCode} {user.phone ? `• ${user.phone}` : ""}
-                          </div>
+
+                        {/* Mobile Status badge & Expand arrow at top right */}
+                        <div className="flex md:hidden items-center gap-1.5 shrink-0">
+                          {user.isInside ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-700 text-white text-[11px] font-black border border-emerald-800 animate-pulse">
+                              <Activity className="w-3 h-3 text-white shrink-0" />
+                              <span>INSIDE</span>
+                            </span>
+                          ) : user.lastOutTime ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800 text-white text-[11px] font-black border border-slate-900">
+                              <CheckCircle2 className="w-3 h-3 text-white shrink-0" />
+                              <span>DONE</span>
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-[11px] font-bold">
+                              No punches
+                            </span>
+                          )}
+
+                          <button
+                            onClick={() => setExpandedUser(isExpanded ? null : user.memberId)}
+                            className="p-1.5 rounded-xl bg-white border-2 border-slate-300 text-slate-800 hover:text-black transition-colors shrink-0 font-bold"
+                            title="View all punches"
+                          >
+                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </button>
                         </div>
                       </div>
 
-                      {/* Status Badges in single line */}
-                      <div className="flex items-center gap-2.5 shrink-0 whitespace-nowrap">
+                      {/* Punch IN & OUT: 2-column grid on mobile, inline on desktop */}
+                      <div className="grid grid-cols-2 md:flex md:items-center gap-2 w-full md:w-auto">
                         {/* IN Time */}
-                        <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-center min-w-[105px] shrink-0 whitespace-nowrap shadow-2xs">
-                          <span className="text-xs text-emerald-900 block uppercase font-black flex items-center justify-center gap-1 whitespace-nowrap">
-                            <LogIn className="w-3.5 h-3.5 text-emerald-700" />
+                        <div className="p-2 sm:p-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-center md:min-w-[105px] shadow-2xs">
+                          <span className="text-[10px] sm:text-xs text-emerald-900 block uppercase font-black flex items-center justify-center gap-1 whitespace-nowrap">
+                            <LogIn className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                             <span>PUNCH IN</span>
                           </span>
-                          <span className="text-sm font-mono font-black text-emerald-950 whitespace-nowrap">
+                          <span className="text-xs sm:text-sm font-mono font-black text-emerald-950 whitespace-nowrap block mt-0.5">
                             {formatTime(user.firstInTime)}
                           </span>
                         </div>
 
                         {/* OUT Time */}
-                        <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-center min-w-[105px] shrink-0 whitespace-nowrap shadow-2xs">
-                          <span className="text-xs text-amber-900 block uppercase font-black flex items-center justify-center gap-1 whitespace-nowrap">
-                            <LogOut className="w-3.5 h-3.5 text-amber-700" />
+                        <div className="p-2 sm:p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-center md:min-w-[105px] shadow-2xs">
+                          <span className="text-[10px] sm:text-xs text-amber-900 block uppercase font-black flex items-center justify-center gap-1 whitespace-nowrap">
+                            <LogOut className="w-3.5 h-3.5 text-amber-700 shrink-0" />
                             <span>PUNCH OUT</span>
                           </span>
-                          <span className="text-sm font-mono font-black text-amber-950 whitespace-nowrap">
+                          <span className="text-xs sm:text-sm font-mono font-black text-amber-950 whitespace-nowrap block mt-0.5">
                             {formatTime(user.lastOutTime)}
                           </span>
                         </div>
 
-                        {/* Status Inside/Outside */}
-                        <div className="min-w-[105px] text-center shrink-0 whitespace-nowrap">
+                        {/* Status (Desktop only) */}
+                        <div className="hidden md:block min-w-[105px] text-center shrink-0 whitespace-nowrap">
                           {user.isInside ? (
                             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 text-white text-xs font-black border border-emerald-800 animate-pulse whitespace-nowrap">
                               <Activity className="w-3.5 h-3.5 text-white shrink-0" />
@@ -447,10 +477,10 @@ export default function AdminAttendanceExplorer({
                           )}
                         </div>
 
-                        {/* Expand Button */}
+                        {/* Expand Button (Desktop only) */}
                         <button
                           onClick={() => setExpandedUser(isExpanded ? null : user.memberId)}
-                          className="p-2 rounded-xl bg-white border-2 border-slate-300 text-slate-800 hover:text-black transition-colors shrink-0 font-bold"
+                          className="hidden md:flex p-2 rounded-xl bg-white border-2 border-slate-300 text-slate-800 hover:text-black transition-colors shrink-0 font-bold"
                           title="View all punches for this user"
                         >
                           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
