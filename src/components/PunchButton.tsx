@@ -154,7 +154,7 @@ export default function PunchButton({
             body: JSON.stringify({
               latitude: currentLat,
               longitude: currentLon,
-              radiusMeters: 100,
+              radiusMeters: 10,
               isEnabled: true,
               officeName: "Current Office",
               calibrate: true,

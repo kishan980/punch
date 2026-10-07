@@ -47,7 +47,7 @@ export default function AdminDashboardClient({
   const [locationConfig, setLocationConfig] = useState<GymLocationConfig>({
     latitude: 19.0760,
     longitude: 72.8777,
-    radiusMeters: 100,
+    radiusMeters: 10,
     isEnabled: true,
     officeName: "Main Gym / Office",
   });
@@ -431,11 +431,7 @@ export default function AdminDashboardClient({
                 }
                 className="w-full bg-slate-50 border-2 border-slate-300 focus:border-emerald-600 rounded-xl px-3 py-2 text-sm font-bold text-black focus:outline-none"
               >
-                <option value={30}>30 meters (Strict / Single Room)</option>
-                <option value={50}>50 meters (Small Gym/Office)</option>
-                <option value={100}>100 meters (Standard / Default)</option>
-                <option value={200}>200 meters (Large Building)</option>
-                <option value={500}>500 meters (Campus)</option>
+                <option value={10}>10 meters (Strict Office Only)</option>
               </select>
             </div>
 

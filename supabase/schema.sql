@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS public.gym_location_settings (
     id TEXT PRIMARY KEY DEFAULT 'default',
     latitude DOUBLE PRECISION NOT NULL DEFAULT 19.0760,
     longitude DOUBLE PRECISION NOT NULL DEFAULT 72.8777,
-    radius_meters INTEGER NOT NULL DEFAULT 100,
+    radius_meters INTEGER NOT NULL DEFAULT 10,
     is_enabled BOOLEAN NOT NULL DEFAULT true,
     office_name TEXT NOT NULL DEFAULT 'Main Office / Gym',
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS public.gym_location_settings (
 
 -- Seed default location if empty
 INSERT INTO public.gym_location_settings (id, latitude, longitude, radius_meters, is_enabled, office_name)
-VALUES ('default', 19.0760, 72.8777, 100, true, 'Main Office / Gym')
+VALUES ('default', 19.0760, 72.8777, 10, true, 'Main Office / Gym')
 ON CONFLICT (id) DO NOTHING;
 
 -- ------------------------------------------------------------------------------

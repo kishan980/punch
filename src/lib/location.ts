@@ -31,7 +31,7 @@ export async function getLocationConfig(): Promise<GymLocationConfig> {
       const cfg: GymLocationConfig = {
         latitude: Number(data.latitude),
         longitude: Number(data.longitude),
-        radiusMeters: Number(data.radius_meters) || 100,
+        radiusMeters: Number(data.radius_meters) || 10,
         isEnabled: data.is_enabled ?? true,
         officeName: data.office_name || "Main Gym / Office",
       };

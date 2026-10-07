@@ -14,7 +14,7 @@ export interface GymLocationConfig {
 export const DEFAULT_LOCATION_CONFIG: GymLocationConfig = {
   latitude: 19.0760, // Example default latitude
   longitude: 72.8777, // Example default longitude
-  radiusMeters: 100, // 100 meters geofence radius
+  radiusMeters: 10, // 10 meters strict geofence radius
   isEnabled: true, // Enabled by default
   officeName: "Main Gym / Office",
 };
