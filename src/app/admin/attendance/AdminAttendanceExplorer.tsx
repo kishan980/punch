@@ -27,11 +27,38 @@ interface AdminAttendanceExplorerProps {
   initialRecords: AttendanceRecord[];
 }
 
+function formatTime(isoString?: string | null) {
+  if (!isoString) return "—";
+  try {
+    return new Date(isoString).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  } catch {
+    return isoString;
+  }
+}
+
+function formatDate(isoString?: string | null) {
+  if (!isoString) return "—";
+  try {
+    return new Date(isoString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return isoString;
+  }
+}
+
 export default function AdminAttendanceExplorer({
   initialRecords,
 }: AdminAttendanceExplorerProps) {
   const [viewMode, setViewMode] = useState<"user-wise" | "logs">("user-wise");
   const [search, setSearch] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedPunchType, setSelectedPunchType] = useState<string>("all");
   const [selectedMethod, setSelectedMethod] = useState<string>("all");
@@ -41,6 +68,31 @@ export default function AdminAttendanceExplorer({
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  // Available unique months list
+  const availableMonths = useMemo(() => {
+    const set = new Set<string>();
+    initialRecords.forEach((r) => {
+      if (r.punch_time) {
+        const d = new Date(r.punch_time);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        set.add(key);
+      }
+    });
+    return Array.from(set).sort().reverse();
+  }, [initialRecords]);
+
+  const formatMonthLabel = (monthKey: string) => {
+    try {
+      const [year, month] = monthKey.split("-").map(Number);
+      return new Date(year, month - 1, 1).toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      });
+    } catch {
+      return monthKey;
+    }
+  };
 
   // Unique members list for dropdown
   const memberOptions = useMemo(() => {
@@ -79,6 +131,14 @@ export default function AdminAttendanceExplorer({
           return false;
         }
 
+        // Month filter
+        if (selectedMonth !== "all") {
+          const recMonth = record.punch_time?.slice(0, 7);
+          if (recMonth !== selectedMonth) {
+            return false;
+          }
+        }
+
         // Date filter
         if (selectedDate) {
           const recordDate = new Date(record.punch_time).toISOString().split("T")[0];
@@ -106,6 +166,7 @@ export default function AdminAttendanceExplorer({
     initialRecords,
     search,
     selectedMember,
+    selectedMonth,
     selectedDate,
     selectedPunchType,
     selectedMethod,
@@ -138,40 +199,157 @@ export default function AdminAttendanceExplorer({
       userMap.get(uId)!.punches.push(record);
     });
 
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const targetMonthKey = selectedMonth !== "all" ? selectedMonth : currentMonthKey;
+    const targetMonthLabel = formatMonthLabel(targetMonthKey);
+
     return Array.from(userMap.values()).map((u) => {
       // Punches are sorted newest first
       const latestPunch = u.punches[0];
       const isInside = latestPunch?.punch_type === "in";
 
-      // Earliest punch in today
+      // Punches in chronological order
       const punchesAsc = [...u.punches].reverse();
-      const firstIn = punchesAsc.find((p) => p.punch_type === "in");
-      const lastOut = u.punches.find((p) => p.punch_type === "out");
 
-      // Calculate active workout duration
-      let durationStr = "—";
-      if (firstIn) {
-        const start = new Date(firstIn.punch_time).getTime();
-        const end = lastOut
-          ? new Date(lastOut.punch_time).getTime()
-          : isInside
-          ? Date.now()
-          : start;
-        const diffMins = Math.max(0, Math.floor((end - start) / 60000));
-        const hrs = Math.floor(diffMins / 60);
-        const mins = diffMins % 60;
-        durationStr = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+      // Build structured workout sessions pairing each IN with its matching OUT
+      interface WorkoutSession {
+        id: string;
+        dateStr: string;
+        isoDate: string;
+        inTime: string;
+        outTime: string | null;
+        durationMins: number;
+        durationDisplay: string;
+        isOngoing: boolean;
       }
+
+      const sessions: WorkoutSession[] = [];
+      let currentSession: WorkoutSession | null = null;
+
+      for (const p of punchesAsc) {
+        if (p.punch_type === "in") {
+          if (currentSession !== null && currentSession.outTime === null) {
+            // Member punched IN again without punching OUT; close previous session
+            const start = new Date(currentSession.inTime).getTime();
+            const end = new Date(p.punch_time).getTime();
+            currentSession.outTime = p.punch_time;
+            const diffMins = Math.max(0, Math.floor((end - start) / 60000));
+            currentSession.durationMins = diffMins;
+            const h = Math.floor(diffMins / 60);
+            const m = diffMins % 60;
+            currentSession.durationDisplay = h > 0 ? `${h}h ${m}m` : `${m}m`;
+            sessions.push(currentSession);
+          }
+
+          currentSession = {
+            id: p.id,
+            dateStr: formatDate(p.punch_time),
+            isoDate: p.punch_time.slice(0, 10),
+            inTime: p.punch_time,
+            outTime: null,
+            durationMins: 0,
+            durationDisplay: "Ongoing",
+            isOngoing: true,
+          };
+        } else if (p.punch_type === "out") {
+          if (currentSession !== null) {
+            const start = new Date(currentSession.inTime).getTime();
+            const end = new Date(p.punch_time).getTime();
+            currentSession.outTime = p.punch_time;
+            currentSession.isOngoing = false;
+            const diffMins = Math.max(0, Math.floor((end - start) / 60000));
+            currentSession.durationMins = diffMins;
+            const h = Math.floor(diffMins / 60);
+            const m = diffMins % 60;
+            currentSession.durationDisplay = h > 0 ? `${h}h ${m}m` : `${m}m`;
+            sessions.push(currentSession);
+            currentSession = null;
+          } else {
+            // Unpaired out
+            sessions.push({
+              id: p.id,
+              dateStr: formatDate(p.punch_time),
+              isoDate: p.punch_time.slice(0, 10),
+              inTime: p.punch_time,
+              outTime: p.punch_time,
+              durationMins: 0,
+              durationDisplay: "Out Only",
+              isOngoing: false,
+            });
+          }
+        }
+      }
+
+      if (currentSession !== null) {
+        if (isInside) {
+          const start = new Date(currentSession.inTime).getTime();
+          const diffMins = Math.max(0, Math.floor((Date.now() - start) / 60000));
+          currentSession.durationMins = diffMins;
+          const h = Math.floor(diffMins / 60);
+          const m = diffMins % 60;
+          currentSession.durationDisplay = h > 0 ? `${h}h ${m}m (Live)` : `${m}m (Live)`;
+          currentSession.isOngoing = true;
+        }
+        sessions.push(currentSession);
+      }
+
+      // Compute MONTHLY workout hours (Target / Selected Month)
+      const monthSessions = sessions.filter((s) => s.isoDate.startsWith(targetMonthKey));
+      const monthTotalMins = monthSessions.reduce((acc, s) => acc + s.durationMins, 0);
+      const monthHrs = Math.floor(monthTotalMins / 60);
+      const monthMins = monthTotalMins % 60;
+      const monthDecimalHrs = (monthTotalMins / 60).toFixed(1);
+      const monthDaysCount = new Set(monthSessions.map((s) => s.isoDate)).size;
+
+      let monthHoursDisplay = "0 hrs";
+      if (monthTotalMins > 0) {
+        if (monthHrs > 0) {
+          monthHoursDisplay = `${monthHrs} hr ${monthMins} min (${monthDecimalHrs} hrs)`;
+        } else {
+          monthHoursDisplay = `${monthMins} min (${monthDecimalHrs} hrs)`;
+        }
+      } else if (monthSessions.length > 0) {
+        monthHoursDisplay = "< 1 min";
+      }
+
+      // Compute TODAY'S workout hours
+      const todaySessions = sessions.filter((s) => s.isoDate === todayStr);
+      const todayTotalMins = todaySessions.reduce((acc, s) => acc + s.durationMins, 0);
+      const todayHrs = Math.floor(todayTotalMins / 60);
+      const todayMins = todayTotalMins % 60;
+      const todayDecimalHrs = (todayTotalMins / 60).toFixed(1);
+
+      let todayHoursDisplay = "0 hrs";
+      if (todayTotalMins > 0) {
+        if (todayHrs > 0) {
+          todayHoursDisplay = `${todayHrs} hr ${todayMins} min (${todayDecimalHrs} hrs)`;
+        } else {
+          todayHoursDisplay = `${todayMins} min (${todayDecimalHrs} hrs)`;
+        }
+      } else if (todaySessions.length > 0) {
+        todayHoursDisplay = "< 1 min";
+      }
+
+      const todayFirstIn = todaySessions.find((s) => s.inTime)?.inTime || null;
+      const todayLastOut = [...todaySessions].reverse().find((s) => s.outTime)?.outTime || null;
 
       return {
         ...u,
         isInside,
-        firstInTime: firstIn?.punch_time || null,
-        lastOutTime: lastOut?.punch_time || null,
-        durationStr,
+        sessions,
+        targetMonthLabel,
+        monthHoursDisplay,
+        monthDaysCount,
+        monthSessionsCount: monthSessions.length,
+        todayHoursDisplay,
+        todayFirstIn,
+        todayLastOut,
+        hasActivityToday: todaySessions.length > 0,
       };
     });
-  }, [filteredRecords]);
+  }, [filteredRecords, selectedMonth]);
 
   // Paginated Slices
   const totalItems = viewMode === "user-wise" ? userWiseData.length : filteredRecords.length;
@@ -187,31 +365,6 @@ export default function AdminAttendanceExplorer({
     const start = (safePage - 1) * pageSize;
     return filteredRecords.slice(start, start + pageSize);
   }, [filteredRecords, safePage, pageSize]);
-
-  const formatTime = (isoString?: string | null) => {
-    if (!isoString) return "—";
-    try {
-      return new Date(isoString).toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      });
-    } catch {
-      return isoString;
-    }
-  };
-
-  const formatDate = (isoString: string) => {
-    try {
-      return new Date(isoString).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-    } catch {
-      return isoString;
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -275,13 +428,13 @@ export default function AdminAttendanceExplorer({
 
       {/* Filter Controls Bar */}
       <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-3 shadow-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
           {/* Member Search */}
           <div className="relative">
             <Search className="w-4 h-4 text-slate-600 absolute left-3.5 top-3.5" />
             <input
               type="text"
-              placeholder="Search member name/code..."
+              placeholder="Search member..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -305,6 +458,25 @@ export default function AdminAttendanceExplorer({
               {memberOptions.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.name} ({m.code})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Month Selector Filter */}
+          <div>
+            <select
+              value={selectedMonth}
+              onChange={(e) => {
+                setSelectedMonth(e.target.value);
+                handleFilterChange();
+              }}
+              className="w-full px-3 py-2.5 rounded-xl bg-white border-2 border-slate-300 text-sm text-black font-semibold focus:outline-none focus:border-emerald-600 transition-all"
+            >
+              <option value="all">All Months</option>
+              {availableMonths.map((m) => (
+                <option key={m} value={m}>
+                  {formatMonthLabel(m)}
                 </option>
               ))}
             </select>
@@ -341,13 +513,14 @@ export default function AdminAttendanceExplorer({
         </div>
 
         {/* Active Filter Pills Bar */}
-        {(search || selectedMember !== "all" || selectedDate || selectedPunchType !== "all") && (
+        {(search || selectedMember !== "all" || selectedMonth !== "all" || selectedDate || selectedPunchType !== "all") && (
           <div className="flex items-center justify-between text-sm pt-2 border-t border-slate-200">
             <span className="text-slate-800 font-semibold">Active filters applied</span>
             <button
               onClick={() => {
                 setSearch("");
                 setSelectedMember("all");
+                setSelectedMonth("all");
                 setSelectedDate("");
                 setSelectedPunchType("all");
                 setSelectedMethod("all");
@@ -415,86 +588,151 @@ export default function AdminAttendanceExplorer({
                         </button>
                       </div>
 
-                      {/* Line 2: Status Badge & Workout Duration */}
+                      {/* Line 2: Status Badge */}
                       <div className="flex items-center justify-between gap-2 py-0.5">
                         {user.isInside ? (
                           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 text-white text-xs font-black border border-emerald-800 animate-pulse whitespace-nowrap">
                             <Activity className="w-3.5 h-3.5 text-white shrink-0" />
                             <span>INSIDE GYM</span>
                           </span>
-                        ) : user.lastOutTime ? (
+                        ) : user.todayLastOut ? (
                           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-white text-xs font-black border border-slate-900 whitespace-nowrap">
                             <CheckCircle2 className="w-3.5 h-3.5 text-white shrink-0" />
-                            <span>COMPLETED</span>
+                            <span>COMPLETED TODAY</span>
                           </span>
                         ) : (
                           <span className="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-xs font-bold whitespace-nowrap">
-                            No punches
+                            No activity today
                           </span>
                         )}
 
-                        {user.durationStr && user.durationStr !== "—" && (
-                          <span className="text-xs font-mono font-bold text-slate-600">
-                            Duration: <strong className="text-black">{user.durationStr}</strong>
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Line 2: PUNCH IN (Full width line) */}
-                      <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between shadow-2xs">
-                        <div className="flex items-center gap-2 font-black text-xs text-emerald-950 uppercase tracking-wide">
-                          <LogIn className="w-4 h-4 text-emerald-700 shrink-0" />
-                          <span>PUNCH IN</span>
-                        </div>
-                        <span className="text-sm font-mono font-black text-emerald-950">
-                          {formatTime(user.firstInTime)}
+                        <span className="text-xs font-mono font-bold text-slate-700">
+                          {user.isInside ? (
+                            <span className="text-emerald-800 font-black">Workout In Progress</span>
+                          ) : user.todayLastOut ? (
+                            <span className="text-slate-700 font-bold">Session Ended</span>
+                          ) : (
+                            "—"
+                          )}
                         </span>
                       </div>
 
-                      {/* Line 3: PUNCH OUT (Full width line) */}
+                      {/* Line 3: THIS MONTH'S TOTAL GYM TIME (Pure Month Ka Time) */}
+                      <div className="p-3 rounded-2xl bg-indigo-50 border-2 border-indigo-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 shadow-2xs">
+                        <div className="flex items-center gap-2 font-black text-xs text-indigo-950 uppercase tracking-wide">
+                          <Calendar className="w-4 h-4 text-indigo-700 shrink-0" />
+                          <span>MONTH&apos;S TOTAL GYM TIME ({user.targetMonthLabel})</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-base sm:text-lg font-mono font-black text-indigo-950">
+                            {user.monthHoursDisplay}
+                          </span>
+                          <span className="text-xs font-bold text-indigo-900 bg-indigo-100 px-2.5 py-0.5 rounded-lg border border-indigo-300 whitespace-nowrap">
+                            {user.monthDaysCount} Days Active
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Line 4: TODAY'S WORKOUT TIME */}
+                      <div className="p-2.5 sm:p-3 rounded-xl bg-blue-50 border-2 border-blue-200 flex items-center justify-between shadow-2xs">
+                        <div className="flex items-center gap-2 font-black text-xs text-blue-950 uppercase tracking-wide">
+                          <Clock className="w-4 h-4 text-blue-700 shrink-0" />
+                          <span>TODAY&apos;S WORKOUT TIME</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-sm sm:text-base font-mono font-black text-blue-950">
+                            {user.todayHoursDisplay}
+                          </span>
+                          {user.isInside && (
+                            <span className="text-[10px] uppercase font-black text-emerald-700 block animate-pulse">
+                              ● Live Ongoing Inside
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Line 5: TODAY'S PUNCH IN (FIRST) */}
+                      <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between shadow-2xs">
+                        <div className="flex items-center gap-2 font-black text-xs text-emerald-950 uppercase tracking-wide">
+                          <LogIn className="w-4 h-4 text-emerald-700 shrink-0" />
+                          <span>TODAY PUNCH IN</span>
+                        </div>
+                        <span className="text-sm font-mono font-black text-emerald-950">
+                          {formatTime(user.todayFirstIn)}
+                        </span>
+                      </div>
+
+                      {/* Line 6: TODAY'S PUNCH OUT (SECOND) */}
                       <div className="p-2.5 sm:p-3 rounded-xl bg-amber-50 border border-amber-300 flex items-center justify-between shadow-2xs">
                         <div className="flex items-center gap-2 font-black text-xs text-amber-950 uppercase tracking-wide">
                           <LogOut className="w-4 h-4 text-amber-700 shrink-0" />
-                          <span>PUNCH OUT</span>
+                          <span>TODAY PUNCH OUT</span>
                         </div>
                         <span className="text-sm font-mono font-black text-amber-950">
-                          {formatTime(user.lastOutTime)}
+                          {user.todayLastOut ? formatTime(user.todayLastOut) : user.isInside ? "Still Inside Gym" : "—"}
                         </span>
                       </div>
                     </div>
 
-                    {/* Expandable Punch Log Drawer */}
+                    {/* Expandable Punch Log Drawer: IN FIRST, OUT SECOND */}
                     {isExpanded && (
-                      <div className="pt-3 border-t-2 border-slate-200 space-y-2 animate-fadeIn">
-                        <div className="text-xs font-black text-black uppercase tracking-wider">
-                          Full punch logs today ({user.punches.length})
+                      <div className="pt-3 border-t-2 border-slate-200 space-y-2.5 animate-fadeIn">
+                        <div className="flex items-center justify-between text-xs font-black text-black uppercase tracking-wider">
+                          <span>Workout Sessions History (IN ➔ OUT)</span>
+                          <span className="text-slate-500 font-mono">
+                            {user.sessions.length} sessions ({user.punches.length} punches)
+                          </span>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {user.punches.map((p) => (
-                            <div
-                              key={p.id}
-                              className={`p-3 rounded-xl border flex items-center justify-between text-sm ${
-                                p.punch_type === "in"
-                                  ? "bg-emerald-600 text-white"
-                                  : "bg-amber-500 text-slate-950 font-black"
-                              }`}
-                            >
-                              <div className="flex items-center gap-2 font-black whitespace-nowrap">
-                                {p.punch_type === "in" ? (
-                                  <LogIn className="w-4 h-4 text-white" />
-                                ) : (
-                                  <LogOut className="w-4 h-4 text-slate-950" />
-                                )}
-                                <span>{p.punch_type.toUpperCase()}</span>
-                                <span className={`text-xs font-bold ${p.punch_type === "in" ? "text-emerald-100" : "text-amber-950"}`}>
-                                  ({formatDate(p.punch_time)})
-                                </span>
-                              </div>
-                              <span className="font-mono font-black whitespace-nowrap">
-                                {formatTime(p.punch_time)}
-                              </span>
-                            </div>
-                          ))}
+
+                        <div className="space-y-2">
+                          {user.sessions.length === 0 ? (
+                            <p className="text-xs text-slate-500 font-medium py-2">No sessions found.</p>
+                          ) : (
+                            user.sessions
+                              .slice()
+                              .reverse()
+                              .map((sess, idx) => (
+                                <div
+                                  key={sess.id || idx}
+                                  className="p-3 rounded-2xl bg-white border-2 border-slate-200 hover:border-slate-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-2xs"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-black text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                                      {sess.dateStr}
+                                    </span>
+                                  </div>
+
+                                  {/* PAIR: IN ALWAYS FIRST, OUT ALWAYS SECOND */}
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    {/* IN (FIRST) */}
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-mono text-xs font-black shadow-2xs">
+                                      <LogIn className="w-3.5 h-3.5 text-white shrink-0" />
+                                      <span>IN: {formatTime(sess.inTime)}</span>
+                                    </div>
+
+                                    <span className="text-slate-400 font-black px-0.5 text-sm">➔</span>
+
+                                    {/* OUT (SECOND) */}
+                                    {sess.outTime ? (
+                                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-mono text-xs font-black shadow-2xs">
+                                        <LogOut className="w-3.5 h-3.5 text-slate-950 shrink-0" />
+                                        <span>OUT: {formatTime(sess.outTime)}</span>
+                                      </div>
+                                    ) : (
+                                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 text-white font-mono text-xs font-black border border-emerald-800 animate-pulse shadow-2xs">
+                                        <Activity className="w-3.5 h-3.5 text-white shrink-0" />
+                                        <span>STILL INSIDE</span>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* DURATION */}
+                                  <div className="text-xs font-mono font-black text-indigo-950 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-xl self-start sm:self-auto">
+                                    ⏱ {sess.durationDisplay}
+                                  </div>
+                                </div>
+                              ))
+                          )}
                         </div>
                       </div>
                     )}

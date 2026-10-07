@@ -11,6 +11,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Clock,
 } from "lucide-react";
 import type { Profile } from "@/types/attendance";
 
@@ -23,6 +24,10 @@ interface AdminMembersClientProps {
       firstInTime: string | null;
       lastOutTime: string | null;
       latestType: string | null;
+      monthHoursDisplay?: string;
+      monthDaysCount?: number;
+      todayHoursDisplay?: string;
+      isInside?: boolean;
     }
   >;
 }
@@ -208,13 +213,14 @@ export default function AdminMembersClient({
                 <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Phone</th>
                 <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Status</th>
                 <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Biometric</th>
+                <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Total Gym Time</th>
                 <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Today&apos;s Punch IN / OUT</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
               {paginatedMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-sm text-slate-600 font-bold">
+                  <td colSpan={7} className="text-center py-8 text-sm text-slate-600 font-bold">
                     No members match your search criteria.
                   </td>
                 </tr>
@@ -260,6 +266,33 @@ export default function AdminMembersClient({
                             <XCircle className="w-4 h-4 text-slate-500 shrink-0" />
                             <span>Not Registered</span>
                           </span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-3.5 whitespace-nowrap">
+                        {punchData?.monthHoursDisplay && punchData.monthHoursDisplay !== "0 hrs" ? (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1.5 whitespace-nowrap">
+                              <span className="inline-flex items-center gap-1.5 text-xs font-mono font-black text-indigo-950 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-lg">
+                                <Clock className="w-3.5 h-3.5 text-indigo-700 shrink-0" />
+                                <span>Month: {punchData.monthHoursDisplay}</span>
+                              </span>
+                              <span className="text-[10px] font-bold text-indigo-800 bg-indigo-100 px-1.5 py-0.5 rounded border border-indigo-200">
+                                {punchData.monthDaysCount}d
+                              </span>
+                            </div>
+                            {punchData.todayHoursDisplay && punchData.todayHoursDisplay !== "0 hrs" && (
+                              <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-slate-700">
+                                <span>Today: {punchData.todayHoursDisplay}</span>
+                                {isInside && (
+                                  <span className="text-[9px] font-black uppercase text-emerald-800 bg-emerald-100 px-1.5 py-0.2 rounded border border-emerald-300 animate-pulse">
+                                    Live
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 text-xs font-semibold">—</span>
                         )}
                       </td>
                       <td className="py-3.5 px-3.5 whitespace-nowrap">

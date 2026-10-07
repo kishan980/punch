@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Users,
   Fingerprint,
@@ -130,6 +130,66 @@ export default function AdminDashboardClient({
   const currentlyInsideCount = Object.values(memberLatestPunch).filter(
     (type) => type === "in"
   ).length;
+
+  // Compute Member Total Gym Workout Duration Today
+  const memberWorkoutHoursMap = useMemo(() => {
+    const map = new Map<string, { durationDisplay: string; isInside: boolean }>();
+    const memberGroups = new Map<string, AttendanceRecord[]>();
+
+    for (const p of punches) {
+      if (!memberGroups.has(p.member_id)) {
+        memberGroups.set(p.member_id, []);
+      }
+      memberGroups.get(p.member_id)!.push(p);
+    }
+
+    for (const [memberId, memberPunches] of memberGroups.entries()) {
+      const asc = [...memberPunches].sort(
+        (a, b) => new Date(a.punch_time).getTime() - new Date(b.punch_time).getTime()
+      );
+      const latestPunch = memberPunches[0];
+      const isInside = latestPunch?.punch_type === "in";
+
+      let totalDurationMs = 0;
+      let activeInTime: number | null = null;
+
+      for (const p of asc) {
+        const time = new Date(p.punch_time).getTime();
+        if (p.punch_type === "in") {
+          if (activeInTime === null) activeInTime = time;
+        } else if (p.punch_type === "out") {
+          if (activeInTime !== null) {
+            totalDurationMs += Math.max(0, time - activeInTime);
+            activeInTime = null;
+          }
+        }
+      }
+
+      if (activeInTime !== null && isInside) {
+        totalDurationMs += Math.max(0, Date.now() - activeInTime);
+      }
+
+      const totalMins = Math.floor(totalDurationMs / 60000);
+      const hrs = Math.floor(totalMins / 60);
+      const mins = totalMins % 60;
+      const decimalHrs = (totalMins / 60).toFixed(1);
+
+      let durationDisplay = "0 hrs";
+      if (totalMins > 0) {
+        if (hrs > 0) {
+          durationDisplay = `${hrs}h ${mins}m (${decimalHrs} hrs)`;
+        } else {
+          durationDisplay = `${mins}m (${decimalHrs} hrs)`;
+        }
+      } else {
+        durationDisplay = "< 1 min";
+      }
+
+      map.set(memberId, { durationDisplay, isInside });
+    }
+
+    return map;
+  }, [punches]);
 
   const formatTime = (isoString: string) => {
     try {
@@ -540,8 +600,15 @@ export default function AdminDashboardClient({
                       >
                         <td className="py-3.5 px-3.5 font-bold text-black whitespace-nowrap">
                           <div className="whitespace-nowrap text-sm font-black text-black">{record.profiles?.full_name || "Unknown Member"}</div>
-                          <div className="text-xs font-mono font-bold text-emerald-800 whitespace-nowrap mt-0.5">
-                            {record.profiles?.member_code}
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-xs font-mono font-bold text-emerald-800 whitespace-nowrap">
+                              {record.profiles?.member_code}
+                            </span>
+                            {memberWorkoutHoursMap.get(record.member_id)?.durationDisplay && (
+                              <span className="text-[11px] font-mono font-bold text-indigo-900 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+                                <span>⏱ {memberWorkoutHoursMap.get(record.member_id)!.durationDisplay}</span>
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="py-3.5 px-3.5 font-mono font-black text-black whitespace-nowrap text-sm">
