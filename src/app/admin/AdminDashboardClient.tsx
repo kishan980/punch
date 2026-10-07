@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import {
   Users,
   Fingerprint,
@@ -12,8 +11,17 @@ import {
   Radio,
   ChevronLeft,
   ChevronRight,
+  MapPin,
+  Navigation,
+  ExternalLink,
+  ShieldCheck,
+  CheckCircle2,
+  AlertTriangle,
+  Save,
+  Loader2,
 } from "lucide-react";
-import type { AttendanceRecord, Profile } from "@/types/attendance";
+import type { AttendanceRecord } from "@/types/attendance";
+import type { GymLocationConfig } from "@/lib/geo";
 import { createClient } from "@/lib/supabase/client";
 import { soundEffects } from "@/lib/audio";
 
@@ -34,6 +42,30 @@ export default function AdminDashboardClient({
   );
   const [totalMembers] = useState(initialTotalMembers);
   const [liveEventNotice, setLiveEventNotice] = useState<string | null>(null);
+
+  // GPS Geofence Settings State
+  const [locationConfig, setLocationConfig] = useState<GymLocationConfig>({
+    latitude: 19.0760,
+    longitude: 72.8777,
+    radiusMeters: 100,
+    isEnabled: true,
+    officeName: "Main Gym / Office",
+  });
+  const [locSaving, setLocSaving] = useState(false);
+  const [locDetecting, setLocDetecting] = useState(false);
+  const [locNotice, setLocNotice] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Load initial location config from API
+  useEffect(() => {
+    fetch("/api/admin/location")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.latitude !== undefined) {
+          setLocationConfig(data);
+        }
+      })
+      .catch((err) => console.error("Error loading location settings:", err));
+  }, []);
 
   // 1. Supabase Realtime Channel
   useEffect(() => {
@@ -112,12 +144,90 @@ export default function AdminDashboardClient({
     }
   };
 
+  // Detect Admin's Current Location via browser Geolocation
+  const handleDetectCurrentLocation = () => {
+    if (!("geolocation" in navigator)) {
+      setLocNotice({ type: "error", text: "Aapke browser me GPS / Geolocation support nahi hai." });
+      return;
+    }
+
+    setLocDetecting(true);
+    setLocNotice(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = Number(pos.coords.latitude.toFixed(6));
+        const lon = Number(pos.coords.longitude.toFixed(6));
+        setLocationConfig((prev) => ({
+          ...prev,
+          latitude: lat,
+          longitude: lon,
+        }));
+        setLocDetecting(false);
+        setLocNotice({
+          type: "success",
+          text: `Office location detect ho gayi! (Lat: ${lat}, Lon: ${lon}) — Please "Save Settings" par click karein.`,
+        });
+      },
+      (err) => {
+        setLocDetecting(false);
+        let msg = "Location detect nahi ho saki.";
+        if (err.code === 1) {
+          msg = "GPS permission block hai. Please browser settings se location allow karein.";
+        }
+        setLocNotice({ type: "error", text: msg });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
+
+  // Save updated Office Location settings
+  const handleSaveLocation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLocSaving(true);
+    setLocNotice(null);
+
+    try {
+      const res = await fetch("/api/admin/location", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(locationConfig),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Location update failed.");
+      }
+
+      setLocationConfig(data.config);
+      setLocNotice({
+        type: "success",
+        text: "Office GPS Location & Geofence settings successfully save ho gayi hain! ✅",
+      });
+
+      setTimeout(() => {
+        setLocNotice(null);
+      }, 5000);
+    } catch (err) {
+      const error = err as Error;
+      setLocNotice({ type: "error", text: error.message || "Failed to save location." });
+    } finally {
+      setLocSaving(false);
+    }
+  };
+
   // Pagination state for Today's Live Punches table
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const totalPages = Math.max(1, Math.ceil(punches.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
   const paginatedPunches = punches.slice((safePage - 1) * pageSize, safePage * pageSize);
+
+  const googleMapsUrl = `https://www.google.com/maps?q=${locationConfig.latitude},${locationConfig.longitude}`;
 
   return (
     <div className="space-y-6">
@@ -166,6 +276,212 @@ export default function AdminDashboardClient({
             {currentlyInsideCount}
           </div>
         </div>
+      </div>
+
+      {/* OFFICE GPS GEOFENCING CONFIGURATION CARD */}
+      <div className="bg-white border-2 border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b-2 border-slate-100 gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-800 shrink-0">
+              <MapPin className="w-5 h-5 text-emerald-700" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-black uppercase tracking-tight text-black">
+                  Office GPS Geofencing (कार्यालय लोकेशन नियंत्रण)
+                </h2>
+                <span
+                  className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${
+                    locationConfig.isEnabled
+                      ? "bg-emerald-100 text-emerald-950 border-emerald-300"
+                      : "bg-slate-100 text-slate-700 border-slate-300"
+                  }`}
+                >
+                  {locationConfig.isEnabled ? "ENFORCED ON" : "DISABLED"}
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 font-semibold mt-0.5">
+                Member sirf is office area aur allowed radius ke andar hi punch kar payenge.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleDetectCurrentLocation}
+              disabled={locDetecting}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-300 text-emerald-950 rounded-xl text-xs font-black transition-colors"
+            >
+              {locDetecting ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-700" />
+              ) : (
+                <Navigation className="w-3.5 h-3.5 text-emerald-700" />
+              )}
+              <span>{locDetecting ? "Detecting GPS..." : "📍 Get My Current GPS"}</span>
+            </button>
+
+            <a
+              href={googleMapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 text-slate-900 rounded-xl text-xs font-bold transition-colors"
+              title="View on Google Maps"
+            >
+              <span>View Map</span>
+              <ExternalLink className="w-3.5 h-3.5 text-slate-700" />
+            </a>
+          </div>
+        </div>
+
+        {/* Notice alert */}
+        {locNotice && (
+          <div
+            className={`p-3.5 rounded-2xl border text-xs font-bold flex items-center gap-2.5 shadow-xs ${
+              locNotice.type === "success"
+                ? "bg-emerald-50 border-emerald-300 text-emerald-950"
+                : "bg-rose-50 border-rose-300 text-rose-950"
+            }`}
+          >
+            {locNotice.type === "success" ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+            )}
+            <span>{locNotice.text}</span>
+          </div>
+        )}
+
+        {/* Geofence Form */}
+        <form onSubmit={handleSaveLocation} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {/* Latitude input */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-black uppercase tracking-wider text-slate-800">
+                Latitude (अक्षांश)
+              </label>
+              <input
+                type="number"
+                step="0.000001"
+                required
+                value={locationConfig.latitude}
+                onChange={(e) =>
+                  setLocationConfig((prev) => ({
+                    ...prev,
+                    latitude: Number(e.target.value),
+                  }))
+                }
+                placeholder="e.g. 19.076000"
+                className="w-full bg-slate-50 border-2 border-slate-300 focus:border-emerald-600 rounded-xl px-3 py-2 text-sm font-mono font-bold text-black focus:outline-none"
+              />
+            </div>
+
+            {/* Longitude input */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-black uppercase tracking-wider text-slate-800">
+                Longitude (देशांतर)
+              </label>
+              <input
+                type="number"
+                step="0.000001"
+                required
+                value={locationConfig.longitude}
+                onChange={(e) =>
+                  setLocationConfig((prev) => ({
+                    ...prev,
+                    longitude: Number(e.target.value),
+                  }))
+                }
+                placeholder="e.g. 72.877700"
+                className="w-full bg-slate-50 border-2 border-slate-300 focus:border-emerald-600 rounded-xl px-3 py-2 text-sm font-mono font-bold text-black focus:outline-none"
+              />
+            </div>
+
+            {/* Allowed Radius input */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-black uppercase tracking-wider text-slate-800">
+                Allowed Radius (मीटर में)
+              </label>
+              <select
+                value={locationConfig.radiusMeters}
+                onChange={(e) =>
+                  setLocationConfig((prev) => ({
+                    ...prev,
+                    radiusMeters: Number(e.target.value),
+                  }))
+                }
+                className="w-full bg-slate-50 border-2 border-slate-300 focus:border-emerald-600 rounded-xl px-3 py-2 text-sm font-bold text-black focus:outline-none"
+              >
+                <option value={30}>30 meters (Strict / Single Room)</option>
+                <option value={50}>50 meters (Small Gym/Office)</option>
+                <option value={100}>100 meters (Standard / Default)</option>
+                <option value={200}>200 meters (Large Building)</option>
+                <option value={500}>500 meters (Campus)</option>
+              </select>
+            </div>
+
+            {/* Office / Gym Name */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-black uppercase tracking-wider text-slate-800">
+                Office / Gym Name
+              </label>
+              <input
+                type="text"
+                value={locationConfig.officeName}
+                onChange={(e) =>
+                  setLocationConfig((prev) => ({
+                    ...prev,
+                    officeName: e.target.value,
+                  }))
+                }
+                placeholder="Main Office"
+                className="w-full bg-slate-50 border-2 border-slate-300 focus:border-emerald-600 rounded-xl px-3 py-2 text-sm font-bold text-black focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+            {/* Toggle Geofencing switch */}
+            <label className="flex items-center gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={locationConfig.isEnabled}
+                onChange={(e) =>
+                  setLocationConfig((prev) => ({
+                    ...prev,
+                    isEnabled: e.target.checked,
+                  }))
+                }
+                className="w-5 h-5 accent-emerald-600 rounded cursor-pointer"
+              />
+              <span className="text-xs font-black uppercase tracking-wide text-black">
+                {locationConfig.isEnabled ? (
+                  <span className="text-emerald-800 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    GPS Geofence Restriction Active (Bahar se punch block rahega)
+                  </span>
+                ) : (
+                  <span className="text-slate-600">
+                    GPS Geofence Inactive (Kahi se bhi punch allow hai)
+                  </span>
+                )}
+              </span>
+            </label>
+
+            <button
+              type="submit"
+              disabled={locSaving}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-sm disabled:opacity-50"
+            >
+              {locSaving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              <span>{locSaving ? "Saving..." : "Save Office GPS Settings"}</span>
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Today's Attendance Table with Live Stream */}

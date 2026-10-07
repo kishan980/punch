@@ -37,6 +37,8 @@ CREATE TABLE IF NOT EXISTS public.attendance (
     punch_type TEXT NOT NULL CHECK (punch_type IN ('in', 'out')),
     punch_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     method TEXT NOT NULL CHECK (method IN ('mobile_biometric', 'biometric_machine', 'qr', 'admin', 'api')) DEFAULT 'mobile_biometric',
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -65,7 +67,25 @@ CREATE INDEX IF NOT EXISTS idx_webauthn_user_id ON public.webauthn_credentials(u
 CREATE INDEX IF NOT EXISTS idx_webauthn_credential_id ON public.webauthn_credentials(credential_id);
 
 -- ------------------------------------------------------------------------------
--- 4. FUTURE BIOMETRIC MACHINE TABLE (Prepared as requested in Section 28)
+-- 4. OFFICE / GYM LOCATION GEOFENCE SETTINGS TABLE
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.gym_location_settings (
+    id TEXT PRIMARY KEY DEFAULT 'default',
+    latitude DOUBLE PRECISION NOT NULL DEFAULT 19.0760,
+    longitude DOUBLE PRECISION NOT NULL DEFAULT 72.8777,
+    radius_meters INTEGER NOT NULL DEFAULT 100,
+    is_enabled BOOLEAN NOT NULL DEFAULT true,
+    office_name TEXT NOT NULL DEFAULT 'Main Office / Gym',
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Seed default location if empty
+INSERT INTO public.gym_location_settings (id, latitude, longitude, radius_meters, is_enabled, office_name)
+VALUES ('default', 19.0760, 72.8777, 100, true, 'Main Office / Gym')
+ON CONFLICT (id) DO NOTHING;
+
+-- ------------------------------------------------------------------------------
+-- 5. FUTURE BIOMETRIC MACHINE TABLE (Prepared as requested in Section 28)
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.biometric_devices (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -77,7 +97,7 @@ CREATE TABLE IF NOT EXISTS public.biometric_devices (
 );
 
 -- ------------------------------------------------------------------------------
--- 5. UPDATED_AT TRIGGER FUNCTION
+-- 6. UPDATED_AT TRIGGER FUNCTION
 -- ------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
 RETURNS TRIGGER AS $$
@@ -99,8 +119,14 @@ CREATE TRIGGER set_webauthn_credentials_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION public.handle_updated_at();
 
+DROP TRIGGER IF EXISTS set_gym_location_settings_updated_at ON public.gym_location_settings;
+CREATE TRIGGER set_gym_location_settings_updated_at
+    BEFORE UPDATE ON public.gym_location_settings
+    FOR EACH ROW
+    EXECUTE FUNCTION public.handle_updated_at();
+
 -- ------------------------------------------------------------------------------
--- 6. ADMIN ROLE CHECK HELPER
+-- 7. ADMIN ROLE CHECK HELPER
 -- ------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.is_admin(check_user_id UUID)
 RETURNS BOOLEAN AS $$
@@ -113,13 +139,14 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ------------------------------------------------------------------------------
--- 7. ROW LEVEL SECURITY (RLS)
+-- 8. ROW LEVEL SECURITY (RLS)
 -- ------------------------------------------------------------------------------
 
 -- Enable RLS on all tables
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.attendance ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.webauthn_credentials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.gym_location_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.biometric_devices ENABLE ROW LEVEL SECURITY;
 
 -- ---- PROFILES POLICIES ----
@@ -180,6 +207,19 @@ CREATE POLICY "Users can delete their own credentials"
     FOR DELETE
     USING (user_id = auth.uid() OR public.is_admin(auth.uid()));
 
+-- ---- LOCATION SETTINGS POLICIES ----
+DROP POLICY IF EXISTS "Anyone can view office location settings" ON public.gym_location_settings;
+CREATE POLICY "Anyone can view office location settings"
+    ON public.gym_location_settings
+    FOR SELECT
+    USING (true);
+
+DROP POLICY IF EXISTS "Only admins can modify office location settings" ON public.gym_location_settings;
+CREATE POLICY "Only admins can modify office location settings"
+    ON public.gym_location_settings
+    FOR ALL
+    USING (public.is_admin(auth.uid()));
+
 -- ---- BIOMETRIC DEVICES POLICIES ----
 DROP POLICY IF EXISTS "Only admins can manage biometric devices" ON public.biometric_devices;
 CREATE POLICY "Only admins can manage biometric devices"
@@ -188,6 +228,6 @@ CREATE POLICY "Only admins can manage biometric devices"
     USING (public.is_admin(auth.uid()));
 
 -- ------------------------------------------------------------------------------
--- 8. REALTIME REPLICATION (For Live Attendance Monitoring)
+-- 9. REALTIME REPLICATION (For Live Attendance Monitoring)
 -- ------------------------------------------------------------------------------
 ALTER PUBLICATION supabase_realtime ADD TABLE public.attendance;

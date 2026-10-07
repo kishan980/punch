@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyAndClearBiometricReceipt } from "@/lib/webauthn/helpers";
+import { getLocationConfig, calculateDistanceMeters } from "@/lib/location";
 
 export async function POST(request: Request) {
   try {
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { punchType } = body;
+    const { punchType, latitude, longitude } = body;
 
     if (punchType !== "in" && punchType !== "out") {
       return NextResponse.json(
@@ -75,7 +76,50 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Cryptographic WebAuthn Verification check
+    // 4. GPS Geofence Check (Office Area verification)
+    const locationConfig = await getLocationConfig();
+    let distanceMeters: number | null = null;
+
+    if (locationConfig.isEnabled) {
+      if (latitude === undefined || longitude === undefined || latitude === null || longitude === null) {
+        return NextResponse.json(
+          {
+            error: "Office GPS location is required to punch. Please turn on location services on your device.",
+          },
+          { status: 403 }
+        );
+      }
+
+      const memberLat = Number(latitude);
+      const memberLon = Number(longitude);
+
+      if (isNaN(memberLat) || isNaN(memberLon)) {
+        return NextResponse.json(
+          { error: "Invalid GPS coordinates received from device." },
+          { status: 400 }
+        );
+      }
+
+      distanceMeters = calculateDistanceMeters(
+        memberLat,
+        memberLon,
+        locationConfig.latitude,
+        locationConfig.longitude
+      );
+
+      if (distanceMeters > locationConfig.radiusMeters) {
+        return NextResponse.json(
+          {
+            error: `Aap office area se bahar hain (${distanceMeters}m door, Allowed: ${locationConfig.radiusMeters}m). Punch sirf office ke andar se allow hai.`,
+            distance: distanceMeters,
+            allowedRadius: locationConfig.radiusMeters,
+          },
+          { status: 403 }
+        );
+      }
+    }
+
+    // 5. Cryptographic WebAuthn Verification check
     // The server verifies that biometric authentication succeeded in the last 60 seconds
     const receiptValid = await verifyAndClearBiometricReceipt(user.id);
     if (!receiptValid) {
@@ -87,7 +131,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 5. Check today's punch status
+    // 6. Check today's punch status
     const now = new Date();
     // Midnight start of current day in UTC
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
@@ -111,7 +155,7 @@ export async function POST(request: Request) {
       ? todayPunches[todayPunches.length - 1]
       : null;
 
-    // 6. Prevent duplicate punch & validate IN/OUT state machine
+    // 7. Prevent duplicate punch & validate IN/OUT state machine
     if (punchType === "in") {
       if (latestPunch && latestPunch.punch_type === "in") {
         return NextResponse.json(
@@ -136,15 +180,30 @@ export async function POST(request: Request) {
       }
     }
 
-    // 7. Insert attendance
+    // 8. Insert attendance record
     const punchTime = now.toISOString();
-    const { error: insertError } = await supabase.from("attendance").insert({
+    const attendancePayload: Record<string, unknown> = {
       user_id: user.id,
       member_id: profile.id,
       punch_type: punchType,
       punch_time: punchTime,
       method: "mobile_biometric", // Preserves structured future machine compatibility
-    });
+    };
+
+    if (latitude !== undefined && longitude !== undefined) {
+      attendancePayload.latitude = Number(latitude);
+      attendancePayload.longitude = Number(longitude);
+    }
+
+    let { error: insertError } = await supabase.from("attendance").insert(attendancePayload);
+
+    // If column doesn't exist yet in Supabase schema, retry without latitude/longitude
+    if (insertError && (insertError.message?.includes("column") || insertError.message?.includes("latitude"))) {
+      delete attendancePayload.latitude;
+      delete attendancePayload.longitude;
+      const retry = await supabase.from("attendance").insert(attendancePayload);
+      insertError = retry.error;
+    }
 
     if (insertError) {
       console.error("Error inserting attendance record:", insertError);
@@ -154,12 +213,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // 8. Return success
+    // 9. Return success
     return NextResponse.json({
       success: true,
       message: punchType === "in" ? "Punch in successful" : "Punch out successful",
       punchType,
       punchTime,
+      distance: distanceMeters,
     });
   } catch (error: unknown) {
     console.error("Server error during punch recording:", error);
