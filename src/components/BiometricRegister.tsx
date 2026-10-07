@@ -295,8 +295,8 @@ export default function BiometricRegister({
           <span>iPhone Face ID &amp; Android Biometric Support:</span>
         </div>
         <p className="text-slate-800 leading-relaxed font-semibold">
-          • <strong>iPhone:</strong> Button dabate hi Apple ka <strong>Face ID</strong> scanner open hoga aur chehra scan karke attendance punch karega.<br />
-          • <strong>Android:</strong> Phone ke Settings me jo bhi active hai (<strong>Face Unlock</strong> ya <strong>Fingerprint</strong>), wahi screen par verify karega!
+          • <strong>iPhone:</strong> Tapping the button prompts Apple&apos;s native <strong>Face ID</strong> or Touch ID for instant authentication.<br />
+          • <strong>Android:</strong> Uses whichever biometric security is configured in your phone settings (<strong>Fingerprint</strong> or <strong>Face Unlock</strong>).
         </p>
       </div>
 

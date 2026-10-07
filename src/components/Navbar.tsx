@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Dumbbell, LogOut, ShieldCheck, UserCheck, Fingerprint, CalendarCheck } from "lucide-react";
+import { Dumbbell, LogOut, ShieldCheck, UserCheck, Fingerprint, CalendarCheck, Loader2 } from "lucide-react";
 
 interface NavbarProps {
   userRole?: "admin" | "member";
@@ -15,11 +16,17 @@ export default function Navbar({ userRole = "member", memberName, memberCode }: 
   const router = useRouter();
   const pathname = usePathname();
   const supabase = createClient();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
+    setIsLoggingOut(true);
+    try {
+      await supabase.auth.signOut();
+      router.push("/login");
+      router.refresh();
+    } catch {
+      setIsLoggingOut(false);
+    }
   };
 
   const isAdmin = userRole === "admin";
@@ -109,11 +116,16 @@ export default function Navbar({ userRole = "member", memberName, memberCode }: 
 
           <button
             onClick={handleLogout}
+            disabled={isLoggingOut}
             title="Sign out"
-            className="inline-flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-800 hover:text-rose-700 border-2 border-slate-300 hover:border-rose-300 transition-colors text-xs font-black"
+            className="inline-flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-800 hover:text-rose-700 border-2 border-slate-300 hover:border-rose-300 transition-colors text-xs font-black disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline">Sign Out</span>
+            {isLoggingOut ? (
+              <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
+            ) : (
+              <LogOut className="w-4 h-4" />
+            )}
+            <span className="hidden sm:inline">{isLoggingOut ? "Signing Out..." : "Sign Out"}</span>
           </button>
         </div>
       </div>

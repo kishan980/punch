@@ -12,6 +12,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  Trash2,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import type { Profile } from "@/types/attendance";
 
@@ -42,6 +45,11 @@ export default function AdminMembersClient({
     [rawRegisteredIds]
   );
 
+  const [memberList, setMemberList] = useState<Profile[]>(members);
+  const [memberToDelete, setMemberToDelete] = useState<Profile | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteNotice, setDeleteNotice] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [biometricFilter, setBiometricFilter] = useState<string>("all");
@@ -49,6 +57,35 @@ export default function AdminMembersClient({
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  const handleDeleteMember = async () => {
+    if (!memberToDelete) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/members?memberId=${memberToDelete.id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete member");
+      }
+      setMemberList((prev) => prev.filter((m) => m.id !== memberToDelete.id));
+      setDeleteNotice({
+        type: "success",
+        text: `Member ${memberToDelete.full_name} (${memberToDelete.member_code}) deleted successfully.`,
+      });
+      setMemberToDelete(null);
+    } catch (err) {
+      const error = err as Error;
+      setDeleteNotice({
+        type: "error",
+        text: error.message || "Failed to delete member.",
+      });
+    } finally {
+      setIsDeleting(false);
+      setTimeout(() => setDeleteNotice(null), 5000);
+    }
+  };
 
   const formatTime = (isoString?: string | null) => {
     if (!isoString) return "";
@@ -65,7 +102,7 @@ export default function AdminMembersClient({
 
   // Filtered members list
   const filteredMembers = useMemo(() => {
-    return members.filter((member) => {
+    return memberList.filter((member) => {
       // Search
       const query = search.toLowerCase();
       const matchesSearch =
@@ -88,7 +125,7 @@ export default function AdminMembersClient({
 
       return true;
     });
-  }, [members, search, statusFilter, biometricFilter, registeredUserIds]);
+  }, [memberList, search, statusFilter, biometricFilter, registeredUserIds]);
 
   // Pagination calculations
   const totalItems = filteredMembers.length;
@@ -202,6 +239,32 @@ export default function AdminMembersClient({
         </div>
       </div>
 
+      {/* Deletion Status Notice Banner */}
+      {deleteNotice && (
+        <div
+          className={`p-3.5 rounded-2xl border text-xs font-black flex items-center justify-between gap-3 shadow-md animate-fadeIn ${
+            deleteNotice.type === "success"
+              ? "bg-emerald-50 border-emerald-300 text-emerald-900"
+              : "bg-rose-50 border-rose-300 text-rose-900"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {deleteNotice.type === "success" ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+            )}
+            <span>{deleteNotice.text}</span>
+          </div>
+          <button
+            onClick={() => setDeleteNotice(null)}
+            className="text-xs font-bold underline hover:no-underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Member List Table */}
       <div className="bg-white border-2 border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
         <div className="overflow-x-auto scrollbar-thin">
@@ -215,12 +278,13 @@ export default function AdminMembersClient({
                 <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Biometric</th>
                 <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Total Gym Time</th>
                 <th className="py-3.5 px-3.5 font-black whitespace-nowrap">Today&apos;s Punch IN / OUT</th>
+                <th className="py-3.5 px-3.5 font-black whitespace-nowrap text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
               {paginatedMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-sm text-slate-600 font-bold">
+                  <td colSpan={8} className="text-center py-8 text-sm text-slate-600 font-bold">
                     No members match your search criteria.
                   </td>
                 </tr>
@@ -320,6 +384,17 @@ export default function AdminMembersClient({
                           </span>
                         )}
                       </td>
+                      <td className="py-3.5 px-3.5 whitespace-nowrap text-right">
+                        <button
+                          type="button"
+                          onClick={() => setMemberToDelete(member)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-900 border border-rose-200 transition-colors text-xs font-black shadow-2xs cursor-pointer"
+                          title={`Delete member ${member.full_name}`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                          <span>Delete</span>
+                        </button>
+                      </td>
                     </tr>
                   );
                 })
@@ -327,6 +402,64 @@ export default function AdminMembersClient({
             </tbody>
           </table>
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {memberToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
+            <div className="bg-white rounded-3xl max-w-md w-full p-6 border-2 border-slate-200 shadow-2xl space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center mx-auto border border-rose-200">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div className="text-center space-y-1">
+                <h3 className="text-lg font-black text-black uppercase">
+                  Delete Member Account?
+                </h3>
+                <p className="text-xs text-slate-600 font-semibold leading-relaxed">
+                  Are you sure you want to permanently delete member{" "}
+                  <strong className="text-black">{memberToDelete.full_name}</strong> (
+                  <span className="font-mono font-bold text-emerald-800">{memberToDelete.member_code}</span>)?
+                </p>
+              </div>
+              <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 text-amber-900 text-xs font-bold space-y-1">
+                <div className="flex items-center gap-1.5 font-black text-amber-950 uppercase">
+                  <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
+                  <span>Permanent Action</span>
+                </div>
+                <p className="leading-snug">
+                  All punch attendance logs and registered biometric passkeys for this member will be permanently deleted.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={() => setMemberToDelete(null)}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-black transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={handleDeleteMember}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black transition-colors shadow-md inline-flex items-center justify-center gap-1.5"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4 shrink-0" />
+                      <span>Delete Permanently</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* PAGINATION CONTROLS BAR */}
         <div className="bg-slate-100 border-2 border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">

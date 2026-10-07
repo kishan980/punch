@@ -11,6 +11,9 @@ import {
   CheckCircle,
   Smartphone,
   Calendar,
+  Trash2,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import type { AttendanceRecord, Profile } from "@/types/attendance";
 import PunchButton from "@/components/PunchButton";
@@ -34,6 +37,28 @@ export default function MemberDashboardClient({
     )
   );
   const [currentTime, setCurrentTime] = useState<string>("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const handleDeleteAccount = async () => {
+    setIsDeletingAccount(true);
+    setDeleteError(null);
+    try {
+      const res = await fetch("/api/member/account", {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete account");
+      }
+      window.location.href = "/login";
+    } catch (err) {
+      const error = err as Error;
+      setDeleteError(error.message || "Failed to delete account.");
+      setIsDeletingAccount(false);
+    }
+  };
 
   // Digital clock
   useEffect(() => {
@@ -254,6 +279,94 @@ export default function MemberDashboardClient({
           <span>View Logs in Attendance History →</span>
         </Link>
       </div>
+
+      {/* Account Management & Delete Account Section */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-slate-50 border-2 border-slate-200 space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="text-xs font-black uppercase text-slate-800 tracking-wider">
+              Account Management
+            </h3>
+            <p className="text-xs text-slate-600 font-semibold mt-0.5">
+              Logged in as {profile.full_name} ({profile.member_code})
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowDeleteModal(true)}
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-rose-50 text-rose-700 hover:text-rose-800 border-2 border-rose-200 transition-colors text-xs font-black shadow-2xs inline-flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
+          >
+            <Trash2 className="w-3.5 h-3.5 shrink-0" />
+            <span>Delete My Account</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Member Self-Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 border-2 border-slate-200 shadow-2xl space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center mx-auto border border-rose-200">
+              <Trash2 className="w-6 h-6" />
+            </div>
+
+            <div className="text-center space-y-1">
+              <h3 className="text-lg font-black text-black uppercase">
+                Delete Your Account?
+              </h3>
+              <p className="text-xs text-slate-600 font-semibold leading-relaxed">
+                Are you sure you want to permanently delete your member account,{" "}
+                <strong className="text-black">{profile.full_name}</strong>?
+              </p>
+            </div>
+
+            <div className="p-3 bg-rose-50 rounded-2xl border border-rose-200 text-rose-900 text-xs font-bold space-y-1">
+              <div className="flex items-center gap-1.5 font-black text-rose-950 uppercase">
+                <AlertTriangle className="w-4 h-4 text-rose-700 shrink-0" />
+                <span>Warning: Irreversible Action</span>
+              </div>
+              <p className="leading-snug">
+                This will permanently delete your workout history, all punch attendance logs, and your linked biometric passkey. You will not be able to recover this account.
+              </p>
+            </div>
+
+            {deleteError && (
+              <p className="text-xs font-bold text-rose-700 text-center">
+                {deleteError}
+              </p>
+            )}
+
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                disabled={isDeletingAccount}
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-black transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeletingAccount}
+                onClick={handleDeleteAccount}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black transition-colors shadow-md inline-flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                {isDeletingAccount ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 shrink-0" />
+                    <span>Yes, Delete Account</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

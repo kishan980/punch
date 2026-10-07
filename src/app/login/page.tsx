@@ -381,7 +381,11 @@ export default function LoginPage() {
               disabled={setupLoading}
               className="w-full py-2 px-3 text-xs font-black text-emerald-800 hover:text-emerald-950 flex items-center justify-center gap-1.5 transition-colors"
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              {setupLoading ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="w-3.5 h-3.5" />
+              )}
               <span>{setupLoading ? "Initializing..." : "Reset / Seed Demo Accounts"}</span>
             </button>
           </div>

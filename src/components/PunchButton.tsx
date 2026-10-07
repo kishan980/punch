@@ -134,13 +134,13 @@ export default function PunchButton({
   // Set User's CURRENT LOCATION as the Office Location instantly!
   const handleSetCurrentLocationAsOffice = async () => {
     if (!("geolocation" in navigator)) {
-      setErrorMessage("Aapka device GPS support nahi karta.");
+      setErrorMessage("Your device does not support GPS geolocation.");
       return;
     }
 
     setSettingOfficeLoading(true);
     setErrorMessage(null);
-    setStatusMessage("Aapki current location detect karke office set ki jaa rahi hai...");
+    setStatusMessage("Detecting your current coordinates to set as office location...");
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -173,7 +173,7 @@ export default function PunchButton({
 
           soundEffects.playPunchSuccess();
           triggerHaptic("success");
-          setSuccessMessage("✅ Office location updated to your current location! Punch is now unlocked.");
+          setSuccessMessage("✅ Office location updated to your current position! Punch is now unlocked.");
           setStatusMessage(null);
 
           setTimeout(() => {
@@ -192,8 +192,8 @@ export default function PunchButton({
         setStatusMessage(null);
         setErrorMessage(
           err.code === 1
-            ? "Location permission denied. Please allow GPS access on your phone."
-            : "Could not get current GPS coordinates."
+            ? "Location permission denied. Please enable GPS permission on your phone."
+            : "Could not retrieve current GPS coordinates."
         );
       },
       {
@@ -217,7 +217,7 @@ export default function PunchButton({
         soundEffects.playPunchError();
         triggerHaptic("error");
         setErrorMessage(
-          `Aap office area se bahar hain (${distanceMeters}m door, Allowed: ${locationConfig.radiusMeters}m). Punch sirf office ke andar allow hai.`
+          `You are outside the office zone (${distanceMeters}m away, Allowed: ${locationConfig.radiusMeters}m). Attendance punch is only allowed inside the office.`
         );
         return;
       }
@@ -233,10 +233,10 @@ export default function PunchButton({
             setErrorMessage(locResult.error);
           } else if (locResult.distance !== undefined) {
             setErrorMessage(
-              `Aap office area se bahar hain (${locResult.distance}m door, Allowed: ${locationConfig.radiusMeters}m). Punch sirf office ke andar allow hai.`
+              `You are outside the office zone (${locResult.distance}m away, Allowed: ${locationConfig.radiusMeters}m). Attendance punch is only allowed inside the office.`
             );
           } else {
-            setErrorMessage("Office location verification failed. GPS turned ON hona chahiye.");
+            setErrorMessage("Office location verification failed. Please make sure your device GPS is turned on.");
           }
           setStatusMessage(null);
           return;
@@ -383,7 +383,7 @@ export default function PunchButton({
                   <div>
                     <div className="text-rose-900 font-black text-sm">OUTSIDE OFFICE AREA ❌</div>
                     <div className="text-rose-800 font-medium mt-1">
-                      Aap office se <strong>{distanceMeters}m</strong> door dikh rahe hain (Allowed: <strong>{locationConfig.radiusMeters}m</strong>).
+                      You are currently <strong>{distanceMeters}m</strong> away (Allowed radius: <strong>{locationConfig.radiusMeters}m</strong>).
                     </div>
                   </div>
                 </div>
@@ -402,7 +402,7 @@ export default function PunchButton({
               {/* Instant Calibration Button for Office Owner */}
               <div className="pt-2 border-t border-rose-200/80 flex flex-col gap-1.5">
                 <span className="text-[11px] text-slate-800 font-semibold">
-                  Kya aap abhi apne office me baithe hain?
+                  Are you currently located inside the office or gym?
                 </span>
                 <button
                   type="button"
@@ -417,8 +417,8 @@ export default function PunchButton({
                   )}
                   <span>
                     {settingOfficeLoading
-                      ? "Setting Location..."
-                      : "📍 Set Current Location as Office (इसे ऑफिस बनाएं)"}
+                      ? "Calibrating Location..."
+                      : "📍 Set Current Location as Office"}
                   </span>
                 </button>
               </div>
@@ -438,7 +438,7 @@ export default function PunchButton({
             <div className="p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-950 text-xs font-bold flex items-center justify-between shadow-xs">
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
-                <span>Phone GPS / Location Permission ON hona zaroori hai.</span>
+                <span>Phone GPS / Location Permission must be enabled.</span>
               </div>
               <button
                 type="button"
@@ -497,10 +497,21 @@ export default function PunchButton({
           <div className="text-center space-y-0.5">
             <span className="tracking-widest uppercase text-xs font-semibold text-white/80 flex items-center justify-center gap-1.5">
               <Radio className="w-3.5 h-3.5 animate-pulse text-emerald-300" />
-              <span>{isBlockedByLocation ? "LOCATION LOCKED" : "TOUCH SENSOR TO"}</span>
+              <span>
+                {isBlockedByLocation
+                  ? "LOCATION LOCKED"
+                  : loading
+                  ? "SCANNING BIOMETRIC"
+                  : "TOUCH SENSOR TO"}
+              </span>
             </span>
             <div className="text-2xl font-black tracking-tight text-white flex items-center justify-center gap-2">
-              {isBlockedByLocation ? (
+              {loading ? (
+                <>
+                  <Loader2 className="w-6 h-6 animate-spin text-emerald-300" />
+                  <span>RECORDING PUNCH...</span>
+                </>
+              ) : isBlockedByLocation ? (
                 <span>OUTSIDE OFFICE</span>
               ) : isPunchIn ? (
                 <>
