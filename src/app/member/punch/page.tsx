@@ -20,13 +20,18 @@ export default async function MemberPunchPage() {
     .eq("auth_user_id", user.id)
     .single();
 
+  const isAdmin = Boolean(
+    user.email?.toLowerCase().includes("admin") ||
+    profile?.role === "admin"
+  );
+
   const memberProfile: Profile = profile || {
     id: user.id,
     auth_user_id: user.id,
-    full_name: user.email?.split("@")[0] || "Gym Member",
-    member_code: "GYM-0001",
+    full_name: user.email?.split("@")[0] || (isAdmin ? "Gym Admin" : "Gym Member"),
+    member_code: isAdmin ? "ADM-001" : "GYM-0001",
     phone: null,
-    role: "member",
+    role: isAdmin ? "admin" : "member",
     status: "active",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

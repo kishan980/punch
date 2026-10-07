@@ -18,7 +18,8 @@ export default async function HomePage() {
     .eq("auth_user_id", user.id)
     .single();
 
-  if (profile?.role === "admin") {
+  const isAdmin = user.email?.toLowerCase().includes("admin") || profile?.role === "admin";
+  if (isAdmin) {
     redirect("/admin");
   }
 

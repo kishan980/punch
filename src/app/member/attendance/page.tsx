@@ -44,9 +44,9 @@ export default async function MemberAttendancePage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar
-        userRole={profile?.role || "member"}
-        memberName={profile?.full_name || "Gym Member"}
-        memberCode={profile?.member_code || "GYM-0001"}
+        userRole={user.email?.toLowerCase().includes("admin") || profile?.role === "admin" ? "admin" : "member"}
+        memberName={profile?.full_name || user.email?.split("@")[0] || "Gym Member"}
+        memberCode={profile?.member_code || (user.email?.toLowerCase().includes("admin") ? "ADM-001" : "GYM-0001")}
       />
 
       <main className="mobile-container py-6 flex-1 space-y-6">

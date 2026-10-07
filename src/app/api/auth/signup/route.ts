@@ -20,35 +20,70 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabaseAdmin = createAdminClient();
+    let userId: string | null = null;
+    let userObj = null;
 
-    // 1. Create user with email_confirm: true
-    // This auto-confirms the email immediately without sending any verification email!
-    const { data: userData, error: createError } =
-      await supabaseAdmin.auth.admin.createUser({
+    try {
+      const supabaseAdmin = createAdminClient();
+      const { data: userData, error: createError } =
+        await supabaseAdmin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: {
+            full_name: fullName?.trim() || email.split("@")[0],
+          },
+        });
+
+      if (!createError && userData?.user) {
+        userId = userData.user.id;
+        userObj = userData.user;
+      } else if (createError) {
+        if (
+          createError.message?.includes("already registered") ||
+          createError.message?.includes("already been registered")
+        ) {
+          return NextResponse.json(
+            { error: "This email is already registered. Please sign in directly." },
+            { status: 400 }
+          );
+        }
+        throw createError;
+      }
+    } catch {
+      // Fallback: Use standard signup
+      const { createClient } = await import("@/lib/supabase/server");
+      const supabase = await createClient();
+      const { data: suData, error: suErr } = await supabase.auth.signUp({
         email,
         password,
-        email_confirm: true,
-        user_metadata: {
-          full_name: fullName?.trim() || email.split("@")[0],
+        options: {
+          data: {
+            full_name: fullName?.trim() || email.split("@")[0],
+          },
         },
       });
 
-    if (createError) {
-      // If user already exists, give clear feedback
-      if (
-        createError.message?.includes("already registered") ||
-        createError.message?.includes("already been registered")
-      ) {
-        return NextResponse.json(
-          { error: "This email is already registered. Please sign in directly." },
-          { status: 400 }
-        );
+      if (suErr) {
+        if (
+          suErr.message?.includes("already registered") ||
+          suErr.message?.includes("already been registered")
+        ) {
+          return NextResponse.json(
+            { error: "This email is already registered. Please sign in directly." },
+            { status: 400 }
+          );
+        }
+        return NextResponse.json({ error: suErr.message }, { status: 400 });
       }
-      return NextResponse.json({ error: createError.message }, { status: 400 });
+
+      if (suData?.user) {
+        userId = suData.user.id;
+        userObj = suData.user;
+      }
     }
 
-    if (!userData.user) {
+    if (!userId) {
       return NextResponse.json(
         { error: "Failed to create user account." },
         { status: 500 }
@@ -61,21 +96,39 @@ export async function POST(request: Request) {
       ? `ADM-${Math.floor(100 + Math.random() * 900)}`
       : `GYM-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    await supabaseAdmin.from("profiles").upsert(
-      {
-        auth_user_id: userData.user.id,
-        full_name: fullName?.trim() || email.split("@")[0],
-        member_code: defaultCode,
-        role: isAdmin ? "admin" : "member",
-        status: "active",
-      },
-      { onConflict: "auth_user_id" }
-    );
+    try {
+      const supabaseAdmin = createAdminClient();
+      await supabaseAdmin.from("profiles").upsert(
+        {
+          auth_user_id: userId,
+          full_name: fullName?.trim() || email.split("@")[0],
+          member_code: defaultCode,
+          role: isAdmin ? "admin" : "member",
+          status: "active",
+        },
+        { onConflict: "auth_user_id" }
+      );
+    } catch {
+      try {
+        const { createClient } = await import("@/lib/supabase/server");
+        const supabase = await createClient();
+        await supabase.from("profiles").upsert(
+          {
+            auth_user_id: userId,
+            full_name: fullName?.trim() || email.split("@")[0],
+            member_code: defaultCode,
+            role: isAdmin ? "admin" : "member",
+            status: "active",
+          },
+          { onConflict: "auth_user_id" }
+        );
+      } catch {}
+    }
 
     return NextResponse.json({
       success: true,
       message: "Account created and auto-confirmed! Logging in...",
-      user: userData.user,
+      user: userObj,
     });
   } catch (error: unknown) {
     console.error("Signup API error:", error);

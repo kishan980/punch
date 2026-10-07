@@ -10,10 +10,10 @@ import {
   Activity,
   CheckCircle,
   Smartphone,
+  Calendar,
 } from "lucide-react";
 import type { AttendanceRecord, Profile } from "@/types/attendance";
 import PunchButton from "@/components/PunchButton";
-import AttendanceList from "@/components/AttendanceList";
 import { createClient } from "@/lib/supabase/client";
 
 interface MemberDashboardClientProps {
@@ -244,23 +244,15 @@ export default function MemberDashboardClient({
         )}
       </div>
 
-      {/* Today's Punches Real-time List */}
-      <div className="space-y-3.5">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-emerald-600" />
-            <span>Today&apos;s Logs</span>
-          </h3>
-          <Link
-            href="/member/attendance"
-            className="text-xs text-emerald-600 font-bold hover:underline flex items-center gap-1.5"
-          >
-            <span>View History</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        <AttendanceList records={punches} todayOnly={true} />
+      {/* Quick link to full attendance history page */}
+      <div className="pt-2 text-center">
+        <Link
+          href="/member/attendance"
+          className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 text-black text-xs font-black uppercase tracking-wider transition-all shadow-xs"
+        >
+          <Calendar className="w-4 h-4 text-emerald-700" />
+          <span>View Logs in Attendance History →</span>
+        </Link>
       </div>
     </div>
   );

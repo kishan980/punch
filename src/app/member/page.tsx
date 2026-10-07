@@ -50,14 +50,19 @@ export default async function MemberDashboardPage() {
     }
   }
 
+  const isAdminUser = Boolean(
+    user.email?.toLowerCase().includes("admin") ||
+    profile?.role === "admin"
+  );
+
   // Bulletproof fallback so memberProfile is never null
   const memberProfile: Profile = profile || {
     id: user.id,
     auth_user_id: user.id,
-    full_name: user.email?.split("@")[0] || "Gym Member",
-    member_code: "GYM-0001",
+    full_name: user.email?.split("@")[0] || (isAdminUser ? "Gym Admin" : "Gym Member"),
+    member_code: isAdminUser ? "ADM-001" : "GYM-0001",
     phone: null,
-    role: "member",
+    role: isAdminUser ? "admin" : "member",
     status: "active",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -83,12 +88,31 @@ export default async function MemberDashboardPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar
-        userRole={memberProfile.role || "member"}
+        userRole={isAdminUser ? "admin" : (memberProfile.role || "member")}
         memberName={memberProfile.full_name}
         memberCode={memberProfile.member_code}
       />
 
-      <main className="mobile-container py-6 flex-1">
+      <main className="mobile-container py-6 flex-1 space-y-4">
+        {isAdminUser && (
+          <div className="p-4 rounded-2xl bg-slate-900 text-white flex items-center justify-between gap-3 shadow-md">
+            <div>
+              <div className="text-xs font-black uppercase tracking-wider text-emerald-400">
+                Admin Account Active
+              </div>
+              <div className="text-xs text-slate-300 font-semibold">
+                You have administrator privileges.
+              </div>
+            </div>
+            <a
+              href="/admin"
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider shadow-sm transition-all"
+            >
+              Open Admin Portal →
+            </a>
+          </div>
+        )}
+
         <MemberDashboardClient
           profile={memberProfile}
           credentialCount={credentialCount || 0}

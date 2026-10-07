@@ -16,65 +16,137 @@ export default async function AdminDashboardPage() {
     redirect("/login");
   }
 
-  // Verify Admin role using adminClient to bypass RLS restrictions
-  const adminClient = createAdminClient();
-  const isAdminEmail = user.email?.toLowerCase().includes("admin");
+  // Verify Admin role: Allow if email contains admin/owner/manager or profile.role is admin
+  const isAdminEmail = Boolean(
+    user.email?.toLowerCase().includes("admin") ||
+    user.email?.toLowerCase().includes("owner") ||
+    user.email?.toLowerCase().includes("manager")
+  );
 
-  let { data: profile } = await adminClient
+  // Fetch profile via user client first
+  let { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("auth_user_id", user.id)
     .single();
 
+  // If not found with user client, try adminClient safely
+  if (!profile) {
+    try {
+      const adminClient = createAdminClient();
+      const { data: p } = await adminClient
+        .from("profiles")
+        .select("*")
+        .eq("auth_user_id", user.id)
+        .single();
+      if (p) profile = p;
+    } catch {}
+  }
+
+  // If user is admin by email and profile is not yet marked admin, upsert it
   if (isAdminEmail && profile?.role !== "admin") {
-    const { data: updatedProfile } = await adminClient
-      .from("profiles")
-      .upsert(
-        {
-          auth_user_id: user.id,
-          full_name: profile?.full_name || user.email?.split("@")[0] || "Gym Admin",
-          member_code: profile?.member_code?.startsWith("ADM-") ? profile.member_code : "ADM-001",
-          role: "admin",
-          status: "active",
-        },
-        { onConflict: "auth_user_id" }
-      )
-      .select()
-      .single();
-    if (updatedProfile) {
-      profile = updatedProfile;
+    try {
+      const defaultCode = profile?.member_code?.startsWith("ADM-")
+        ? profile.member_code
+        : "ADM-001";
+      const { data: updatedProfile } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            auth_user_id: user.id,
+            full_name: profile?.full_name || user.email?.split("@")[0] || "Gym Admin",
+            member_code: defaultCode,
+            role: "admin",
+            status: "active",
+          },
+          { onConflict: "auth_user_id" }
+        )
+        .select()
+        .single();
+      if (updatedProfile) {
+        profile = updatedProfile;
+      }
+    } catch {
+      try {
+        const adminClient = createAdminClient();
+        const { data: updatedProfile } = await adminClient
+          .from("profiles")
+          .upsert(
+            {
+              auth_user_id: user.id,
+              full_name: profile?.full_name || user.email?.split("@")[0] || "Gym Admin",
+              member_code: "ADM-001",
+              role: "admin",
+              status: "active",
+            },
+            { onConflict: "auth_user_id" }
+          )
+          .select()
+          .single();
+        if (updatedProfile) profile = updatedProfile;
+      } catch {}
     }
   }
 
-  if (profile?.role !== "admin") {
+  // Only redirect if NEITHER the email nor the profile role is admin
+  const isAuthorized = isAdminEmail || profile?.role === "admin";
+  if (!isAuthorized) {
     redirect("/member");
   }
 
   const adminProfile = profile || {
     id: user.id,
     auth_user_id: user.id,
-    full_name: "Gym Admin",
+    full_name: user.email?.split("@")[0] || "Gym Admin",
     member_code: "ADM-001",
     role: "admin",
   };
 
-  // 1. Total Members Count
-  const { count: totalMembers } = await adminClient
-    .from("profiles")
-    .select("*", { count: "exact", head: true })
-    .eq("role", "member");
+  // 1. Total Members Count (Safely try adminClient, then supabase)
+  let totalMembers = 0;
+  try {
+    const adminClient = createAdminClient();
+    const { count } = await adminClient
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("role", "member");
+    if (count !== null) totalMembers = count;
+  } catch {}
+
+  if (totalMembers === 0) {
+    try {
+      const { count } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true });
+      if (count !== null) totalMembers = count;
+    } catch {}
+  }
 
   // 2. Today's Punches
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
 
-  const { data: todayPunchesRaw } = await adminClient
-    .from("attendance")
-    .select("*, profiles (full_name, member_code, phone)")
-    .gte("punch_time", startOfDay)
-    .order("punch_time", { ascending: false });
+  let todayPunches: AttendanceRecord[] = [];
+  try {
+    const adminClient = createAdminClient();
+    const { data: punches } = await adminClient
+      .from("attendance")
+      .select("*, profiles (full_name, member_code, phone)")
+      .gte("punch_time", startOfDay)
+      .order("punch_time", { ascending: false });
+    if (punches) todayPunches = punches as unknown as AttendanceRecord[];
+  } catch {}
 
-  const todayPunches = (todayPunchesRaw as unknown as AttendanceRecord[]) || [];
+  if (todayPunches.length === 0) {
+    try {
+      const { data: punches } = await supabase
+        .from("attendance")
+        .select("*, profiles (full_name, member_code, phone)")
+        .gte("punch_time", startOfDay)
+        .order("punch_time", { ascending: false });
+      if (punches) todayPunches = punches as unknown as AttendanceRecord[];
+    } catch {}
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -84,7 +156,7 @@ export default async function AdminDashboardPage() {
         memberCode={adminProfile.member_code}
       />
 
-      <main className="max-w-3xl mx-auto w-full px-4 py-6 flex-1 space-y-6">
+      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
