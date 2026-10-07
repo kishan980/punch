@@ -147,7 +147,7 @@ export default function AdminDashboardClient({
   // Detect Admin's Current Location via browser Geolocation
   const handleDetectCurrentLocation = () => {
     if (!("geolocation" in navigator)) {
-      setLocNotice({ type: "error", text: "Aapke browser me GPS / Geolocation support nahi hai." });
+      setLocNotice({ type: "error", text: "GPS / Geolocation is not supported by your browser." });
       return;
     }
 
@@ -179,7 +179,7 @@ export default function AdminDashboardClient({
           setLocationConfig(data.config);
           setLocNotice({
             type: "success",
-            text: `Office location set ho gayi! (Lat: ${lat}, Lon: ${lon}) ✅ Ab members yaha punch kar payenge.`,
+            text: `Office location set to: (Lat: ${lat}, Lon: ${lon}) ✅ Members can now punch attendance here.`,
           });
         } catch (e) {
           const err = e as Error;
@@ -190,9 +190,9 @@ export default function AdminDashboardClient({
       },
       (err) => {
         setLocDetecting(false);
-        let msg = "Location detect nahi ho saki.";
+        let msg = "Unable to detect location.";
         if (err.code === 1) {
-          msg = "GPS permission block hai. Please browser settings se location allow karein.";
+          msg = "GPS permission denied. Please allow location access in your browser settings.";
         }
         setLocNotice({ type: "error", text: msg });
       },
@@ -225,7 +225,7 @@ export default function AdminDashboardClient({
       setLocationConfig(data.config);
       setLocNotice({
         type: "success",
-        text: "Office GPS Location & Geofence settings successfully save ho gayi hain! ✅",
+        text: "Office GPS location & geofence settings saved successfully! ✅",
       });
 
       setTimeout(() => {
@@ -307,7 +307,7 @@ export default function AdminDashboardClient({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base sm:text-lg font-black uppercase tracking-tight text-black">
-                  Office GPS Geofencing (कार्यालय लोकेशन नियंत्रण)
+                  Office GPS Geofencing
                 </h2>
                 <span
                   className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${
@@ -320,7 +320,7 @@ export default function AdminDashboardClient({
                 </span>
               </div>
               <p className="text-xs text-slate-600 font-semibold mt-0.5">
-                Member sirf is office area aur allowed radius ke andar hi punch kar payenge.
+                Members can only punch attendance within this office location and allowed radius.
               </p>
             </div>
           </div>
@@ -377,7 +377,7 @@ export default function AdminDashboardClient({
             {/* Latitude input */}
             <div className="space-y-1.5">
               <label className="text-xs font-black uppercase tracking-wider text-slate-800">
-                Latitude (अक्षांश)
+                Latitude
               </label>
               <input
                 type="number"
@@ -398,7 +398,7 @@ export default function AdminDashboardClient({
             {/* Longitude input */}
             <div className="space-y-1.5">
               <label className="text-xs font-black uppercase tracking-wider text-slate-800">
-                Longitude (देशांतर)
+                Longitude
               </label>
               <input
                 type="number"
@@ -419,7 +419,7 @@ export default function AdminDashboardClient({
             {/* Allowed Radius input */}
             <div className="space-y-1.5">
               <label className="text-xs font-black uppercase tracking-wider text-slate-800">
-                Allowed Radius (मीटर में)
+                Allowed Radius
               </label>
               <select
                 value={locationConfig.radiusMeters}
@@ -473,11 +473,11 @@ export default function AdminDashboardClient({
                 {locationConfig.isEnabled ? (
                   <span className="text-emerald-800 flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                    GPS Geofence Restriction Active (Bahar se punch block rahega)
+                    GPS Geofence Restriction Active (Punch blocked outside office area)
                   </span>
                 ) : (
                   <span className="text-slate-600">
-                    GPS Geofence Inactive (Kahi se bhi punch allow hai)
+                    GPS Geofence Inactive (Punch allowed from anywhere)
                   </span>
                 )}
               </span>
