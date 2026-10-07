@@ -15,9 +15,10 @@ declare global {
 
 /**
  * Retrieves the current configured office location.
- * Checks Supabase table first; falls back to runtime cache or default.
+ * Checks Supabase gym_location_settings first, then profiles fallback, then memory/default.
  */
 export async function getLocationConfig(): Promise<GymLocationConfig> {
+  // 1. Try dedicated gym_location_settings table
   try {
     const admin = createAdminClient();
     const { data, error } = await admin
@@ -26,7 +27,7 @@ export async function getLocationConfig(): Promise<GymLocationConfig> {
       .eq("id", "default")
       .single();
 
-    if (!error && data) {
+    if (!error && data && data.latitude !== undefined) {
       const cfg: GymLocationConfig = {
         latitude: Number(data.latitude),
         longitude: Number(data.longitude),
@@ -38,16 +39,34 @@ export async function getLocationConfig(): Promise<GymLocationConfig> {
       return cfg;
     }
   } catch (err) {
-    console.warn("Could not query gym_location_settings from Supabase:", err);
+    console.warn("gym_location_settings query failed, trying profiles fallback:", err);
   }
 
-  // Fallback to in-memory cache or default
+  // 2. Fallback: check profiles table for 'GYM_OFFICE_CONFIG' record
+  try {
+    const admin = createAdminClient();
+    const { data: profileRecord } = await admin
+      .from("profiles")
+      .select("phone")
+      .eq("member_code", "GYM_OFFICE_CONFIG")
+      .single();
+
+    if (profileRecord?.phone) {
+      const parsed = JSON.parse(profileRecord.phone);
+      if (parsed && typeof parsed.latitude === "number") {
+        globalThis.__gym_location_cache = parsed;
+        return parsed;
+      }
+    }
+  } catch {}
+
+  // 3. Fallback to in-memory cache or default
   return globalThis.__gym_location_cache || DEFAULT_LOCATION_CONFIG;
 }
 
 /**
  * Saves/updates office location settings.
- * Persists to Supabase and updates in-memory cache.
+ * Persists to Supabase gym_location_settings AND profiles fallback, and in-memory cache.
  */
 export async function saveLocationConfig(
   newConfig: Partial<GymLocationConfig>
@@ -63,8 +82,10 @@ export async function saveLocationConfig(
 
   globalThis.__gym_location_cache = merged;
 
+  const admin = createAdminClient();
+
+  // 1. Try persisting to gym_location_settings table
   try {
-    const admin = createAdminClient();
     await admin
       .from("gym_location_settings")
       .upsert({
@@ -77,7 +98,23 @@ export async function saveLocationConfig(
         updated_at: new Date().toISOString(),
       });
   } catch (err) {
-    console.warn("Failed to persist gym_location_settings to Supabase, cached in memory:", err);
+    console.warn("gym_location_settings upsert failed:", err);
+  }
+
+  // 2. Also persist to profiles table fallback so it is 100% resilient across Vercel lambdas
+  try {
+    await admin.from("profiles").upsert(
+      {
+        member_code: "GYM_OFFICE_CONFIG",
+        full_name: "Office GPS Config",
+        phone: JSON.stringify(merged),
+        role: "admin",
+        status: "active",
+      },
+      { onConflict: "member_code" }
+    );
+  } catch (err) {
+    console.warn("profiles fallback upsert failed:", err);
   }
 
   return merged;

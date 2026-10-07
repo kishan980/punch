@@ -155,19 +155,38 @@ export default function AdminDashboardClient({
     setLocNotice(null);
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const lat = Number(pos.coords.latitude.toFixed(6));
         const lon = Number(pos.coords.longitude.toFixed(6));
-        setLocationConfig((prev) => ({
-          ...prev,
+        const updated = {
+          ...locationConfig,
           latitude: lat,
           longitude: lon,
-        }));
-        setLocDetecting(false);
-        setLocNotice({
-          type: "success",
-          text: `Office location detect ho gayi! (Lat: ${lat}, Lon: ${lon}) — Please "Save Settings" par click karein.`,
-        });
+          isEnabled: true,
+        };
+        setLocationConfig(updated);
+
+        try {
+          const res = await fetch("/api/admin/location", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updated),
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Failed to save");
+
+          setLocationConfig(data.config);
+          setLocNotice({
+            type: "success",
+            text: `Office location set ho gayi! (Lat: ${lat}, Lon: ${lon}) ✅ Ab members yaha punch kar payenge.`,
+          });
+        } catch (e) {
+          const err = e as Error;
+          setLocNotice({ type: "error", text: err.message || "Failed to save location." });
+        } finally {
+          setLocDetecting(false);
+        }
       },
       (err) => {
         setLocDetecting(false);
@@ -311,14 +330,14 @@ export default function AdminDashboardClient({
               type="button"
               onClick={handleDetectCurrentLocation}
               disabled={locDetecting}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-300 text-emerald-950 rounded-xl text-xs font-black transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black transition-colors shadow-xs"
             >
               {locDetecting ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-700" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
               ) : (
-                <Navigation className="w-3.5 h-3.5 text-emerald-700" />
+                <Navigation className="w-3.5 h-3.5 text-emerald-200" />
               )}
-              <span>{locDetecting ? "Detecting GPS..." : "📍 Get My Current GPS"}</span>
+              <span>{locDetecting ? "Setting GPS..." : "📍 Set My Current GPS as Office"}</span>
             </button>
 
             <a

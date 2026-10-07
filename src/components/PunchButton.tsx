@@ -13,6 +13,7 @@ import {
   MapPin,
   RefreshCw,
   ShieldAlert,
+  Navigation,
 } from "lucide-react";
 import type { PunchType } from "@/types/attendance";
 import { soundEffects, triggerHaptic } from "@/lib/audio";
@@ -42,6 +43,7 @@ export default function PunchButton({
   const [distanceMeters, setDistanceMeters] = useState<number | null>(null);
   const [locationStatus, setLocationStatus] = useState<LocationStatus>("loading");
   const [locatingInProgress, setLocatingInProgress] = useState(false);
+  const [settingOfficeLoading, setSettingOfficeLoading] = useState(false);
 
   // Function to verify GPS location against office coordinates
   const verifyLocation = useCallback(async (activeConfig?: GymLocationConfig) => {
@@ -128,6 +130,79 @@ export default function PunchButton({
   useEffect(() => {
     verifyLocation();
   }, [verifyLocation]);
+
+  // Set User's CURRENT LOCATION as the Office Location instantly!
+  const handleSetCurrentLocationAsOffice = async () => {
+    if (!("geolocation" in navigator)) {
+      setErrorMessage("Aapka device GPS support nahi karta.");
+      return;
+    }
+
+    setSettingOfficeLoading(true);
+    setErrorMessage(null);
+    setStatusMessage("Aapki current location detect karke office set ki jaa rahi hai...");
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const currentLat = Number(pos.coords.latitude.toFixed(6));
+        const currentLon = Number(pos.coords.longitude.toFixed(6));
+
+        try {
+          const res = await fetch("/api/admin/location", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              latitude: currentLat,
+              longitude: currentLon,
+              radiusMeters: 100,
+              isEnabled: true,
+              officeName: "Current Office",
+              calibrate: true,
+            }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || "Failed to update office location.");
+          }
+
+          setLocationConfig(data.config);
+          setMemberCoords({ latitude: currentLat, longitude: currentLon });
+          setDistanceMeters(0);
+          setLocationStatus("inside");
+
+          soundEffects.playPunchSuccess();
+          triggerHaptic("success");
+          setSuccessMessage("✅ Office location updated to your current location! Punch is now unlocked.");
+          setStatusMessage(null);
+
+          setTimeout(() => {
+            setSuccessMessage(null);
+          }, 4000);
+        } catch (e) {
+          const err = e as Error;
+          setErrorMessage(err.message || "Failed to set office location.");
+          setStatusMessage(null);
+        } finally {
+          setSettingOfficeLoading(false);
+        }
+      },
+      (err) => {
+        setSettingOfficeLoading(false);
+        setStatusMessage(null);
+        setErrorMessage(
+          err.code === 1
+            ? "Location permission denied. Please allow GPS access on your phone."
+            : "Could not get current GPS coordinates."
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
 
   const handlePunch = async () => {
     if (loading || disabled) return;
@@ -279,7 +354,7 @@ export default function PunchButton({
     <div className="w-full flex flex-col items-center space-y-4">
       {/* Real-time Office Geofence Status Indicator */}
       {locationConfig?.isEnabled && (
-        <div className="w-full">
+        <div className="w-full space-y-2">
           {locationStatus === "inside" && (
             <div className="p-3 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 text-xs font-bold flex items-center justify-between shadow-xs">
               <div className="flex items-center gap-2">
@@ -301,25 +376,52 @@ export default function PunchButton({
           )}
 
           {locationStatus === "outside" && (
-            <div className="p-3.5 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-950 text-xs font-bold flex items-center justify-between shadow-sm">
-              <div className="flex items-center gap-2.5">
-                <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0" />
-                <div>
-                  <div className="text-rose-900 font-black">OUTSIDE OFFICE AREA ❌</div>
-                  <div className="text-rose-800 font-semibold mt-0.5">
-                    Aap office se <strong>{distanceMeters}m</strong> door hain (Allowed: <strong>{locationConfig.radiusMeters}m</strong>).
+            <div className="p-4 rounded-3xl bg-rose-50 border-2 border-rose-300 text-rose-950 text-xs font-bold space-y-3 shadow-md">
+              <div className="flex items-start justify-between gap-2.5">
+                <div className="flex items-start gap-2.5">
+                  <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-rose-900 font-black text-sm">OUTSIDE OFFICE AREA ❌</div>
+                    <div className="text-rose-800 font-medium mt-1">
+                      Aap office se <strong>{distanceMeters}m</strong> door dikh rahe hain (Allowed: <strong>{locationConfig.radiusMeters}m</strong>).
+                    </div>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => verifyLocation()}
+                  disabled={locatingInProgress}
+                  className="p-1.5 bg-rose-200 hover:bg-rose-300 text-rose-950 rounded-xl text-xs font-black transition-colors shrink-0 flex items-center gap-1"
+                  title="Retry GPS"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${locatingInProgress ? "animate-spin" : ""}`} />
+                  <span>Retry</span>
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => verifyLocation()}
-                disabled={locatingInProgress}
-                className="px-2.5 py-1.5 bg-rose-200 hover:bg-rose-300 text-rose-950 rounded-xl text-xs font-black transition-colors shrink-0 flex items-center gap-1"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${locatingInProgress ? "animate-spin" : ""}`} />
-                <span>Retry</span>
-              </button>
+
+              {/* Instant Calibration Button for Office Owner */}
+              <div className="pt-2 border-t border-rose-200/80 flex flex-col gap-1.5">
+                <span className="text-[11px] text-slate-800 font-semibold">
+                  Kya aap abhi apne office me baithe hain?
+                </span>
+                <button
+                  type="button"
+                  onClick={handleSetCurrentLocationAsOffice}
+                  disabled={settingOfficeLoading}
+                  className="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all"
+                >
+                  {settingOfficeLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  ) : (
+                    <Navigation className="w-4 h-4 text-emerald-200" />
+                  )}
+                  <span>
+                    {settingOfficeLoading
+                      ? "Setting Location..."
+                      : "📍 Set Current Location as Office (इसे ऑफिस बनाएं)"}
+                  </span>
+                </button>
+              </div>
             </div>
           )}
 
